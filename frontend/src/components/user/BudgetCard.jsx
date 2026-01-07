@@ -1,103 +1,152 @@
-import { Grid, Card, CardContent, Typography, Box, Container, useMediaQuery } from "@mui/material";
-import { CreditCard, TrendingUp, CurrencyRupee, AccessTime } from "@mui/icons-material";
+import {
+  Box,
+  Card,
+  Typography,
+  Skeleton,
+  useMediaQuery,
+} from "@mui/material";
+import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
+import CreditCardIcon from "@mui/icons-material/CreditCard";
+import TimelineIcon from "@mui/icons-material/Timeline";
+
+const StatCard = ({
+  title,
+  value,
+  subtitle,
+  icon,
+  accentColor,
+  loading,
+}) => {
+  return (
+    <Card
+      sx={{
+        p: 3.5,
+        height: "100%",
+        borderRadius: 4,
+        backgroundColor: "#ffffff",
+        borderTop: `4px solid ${accentColor}`,
+        boxShadow: "0 6px 18px rgba(0,0,0,0.06)",
+        display: "flex",
+        alignItems: "center",
+        gap: 2,
+        transition: "all 0.25s ease",
+        "&:hover": {
+          transform: "translateY(-4px)",
+          boxShadow: "0 12px 30px rgba(0,0,0,0.12)",
+        },
+        animation: "fadeUp 0.6s ease forwards",
+        "@keyframes fadeUp": {
+          from: { opacity: 0, transform: "translateY(12px)" },
+          to: { opacity: 1, transform: "translateY(0)" },
+        },
+      }}
+    >
+      {/* Icon */}
+      <Box
+        sx={{
+          width: 108,
+          height: 55,
+          borderRadius: 2,
+          backgroundColor: `${accentColor}1A`,
+          color: accentColor,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+        }}
+      >
+        {icon}
+      </Box>
+
+      {/* Content */}
+      <Box sx={{ flex: 1 }}>
+        {loading ? (
+          <>
+            <Skeleton width={120} height={28} sx={{ mb: 0.5 }} />
+            <Skeleton width={160} height={24} sx={{ mb: 0.5 }} />
+            <Skeleton width={140} height={20} />
+          </>
+        ) : (
+          <>
+            <Typography variant="h5" fontWeight={700} sx={{ mb: 0.5 }}>
+              {value}
+            </Typography>
+            <Typography variant="body1" fontWeight={600} sx={{ mb: 0.5 }}>
+              {title}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {subtitle}
+            </Typography>
+          </>
+        )}
+      </Box>
+    </Card>
+  );
+};
 
 const BudgetCard = ({ budgetData }) => {
-    const isSmallMobile = useMediaQuery("(max-width:400px)");
+  const isMobile = useMediaQuery("(max-width:900px)");
 
-    const items = [
-        {
-            title: "Total Allocated",
-            value: `₹${(budgetData?.monthlyBudget || 0).toLocaleString("en-IN")}`,
-            icon: <CreditCard fontSize="large" />,
-            color: "#4361ee",
-            subtitle: "Monthly budget allocation"
-        },
-        {
-            title: "Total Spent",
-            value: `₹${(budgetData?.totalSpent || 0).toLocaleString("en-IN")}`,
-            icon: <TrendingUp fontSize="large" />,
-            color: "#ef476f",
-            subtitle: `${budgetData?.monthlyBudget ? ((budgetData.totalSpent / budgetData.monthlyBudget) * 100).toFixed(1) : '0'}% of budget used`
-        },
-        {
-            title: "Remaining Balance",
-            value: `₹${(budgetData?.remainingBalance || 0).toLocaleString("en-IN")}`,
-            icon: <CurrencyRupee fontSize="large" />,
-            color: "#06d6a0",
-            subtitle: "Available funds"
-        },
-        {
-            title: "Pending Reimbursements",
-            value: (budgetData?.pendingReimbursements || 0).toString(),
-            icon: <AccessTime fontSize="large" />,
-            color: "#ffd166",
-            subtitle: "Awaiting payment"
-        },
-    ];
+  const loading = !budgetData;
 
-    const StatCard = ({ title, value, icon, color, subtitle }) => {
-        return (
-            <Card
-                sx={{
-                    background: `linear-gradient(135deg, ${color} 0%, ${color}dd 100%)`,
-                    color: "white",
-                    borderRadius: 3,
-                    boxShadow: 3,
-                    height: "100%",
-                    minHeight: isSmallMobile ? 120 : 140, // EXACT SAME HEIGHT
-                    display: "flex",
-                    alignItems: "center",
-                }}
-            >
-                <CardContent sx={{
-                    p: 2, // EXACT SAME PADDING
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6, // EXACT SAME GAP
-                    width: "100%"
-                }}>
-                    <Box sx={{
-                        bgcolor: "rgba(199, 184, 184, 0.2)", // EXACT SAME COLOR
-                        borderRadius: "50%",
-                        p: 1.5, // EXACT SAME PADDING
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center"
-                    }}>
-                        {icon}
-                    </Box>
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography variant="h4" fontWeight="bold">
-                            {value}
-                        </Typography>
-                        <Typography variant="body1" fontWeight={500}>
-                            {title}
-                        </Typography>
-                        {subtitle && <Typography variant="body2">{subtitle}</Typography>}
-                    </Box>
-                </CardContent>
-            </Card>
-        );
-    };
+  const stats = [
+    {
+      title: "Total Allocated",
+      value: `₹${(budgetData?.monthlyBudget || 0).toLocaleString("en-IN")}`,
+      subtitle: "Total budget allocation",
+      icon: <AccountBalanceIcon fontSize="large" />,
+      accentColor: "#2563eb",
+    },
+    {
+      title: "Total Expenses",
+      value: `₹${(budgetData?.totalSpent || 0).toLocaleString("en-IN")}`,
+      subtitle: "Total expenses amount",
+      icon: <MonetizationOnIcon fontSize="large" />,
+      accentColor: "#ef4444",
+    },
+    {
+      title: "Pending Reimbursement",
+      value: `₹${(budgetData?.pendingReimbursements || 0).toLocaleString("en-IN")}`,
+      subtitle: "Awaiting processing",
+      icon: <CreditCardIcon fontSize="large" />,
+      accentColor: "#f59e0b",
+    },
+    {
+      title: "Reimbursement Received",
+      value: `₹${(budgetData?.reimbursedAmount || 0).toLocaleString("en-IN")}`,
+      subtitle: "Available funds",
+      icon: <TimelineIcon fontSize="large" />,
+      accentColor: "#10b981",
+    },
+  ];
 
-    return (
-        <Container maxWidth="xl" sx={{ mt: 6, mb: 4 }}>
-            {/* EXACT SAME LAYOUT AS ADMINDASHBOARD */}
-            <Box sx={{ display: "flex", flexDirection: "row", gap: 3 }}>
-                {items.map((item, index) => (
-                    <Box sx={{ width: "100%" }} key={index}>
-                        <StatCard
-                            title={item.title}
-                            value={item.value}
-                            icon={item.icon}
-                            color={item.color}
-                            subtitle={item.subtitle}
-                        />
-                    </Box>
-                ))}
-            </Box>
-        </Container>
-    );
+  return (
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: {
+          xs: "1fr",
+          sm: "1fr 1fr",
+          md: "repeat(4, 1fr)",
+        },
+        gap: 3,
+        mb: 6,
+      }}
+    >
+      {stats.map((stat, index) => (
+        <StatCard
+          key={index}
+          title={stat.title}
+          value={stat.value}
+          subtitle={stat.subtitle}
+          icon={stat.icon}
+          accentColor={stat.accentColor}
+          loading={loading}
+        />
+      ))}
+    </Box>
+  );
 };
 
 export default BudgetCard;

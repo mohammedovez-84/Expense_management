@@ -1,306 +1,135 @@
 import {
-    Box,
-    Divider,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Pagination,
-    Typography,
-    Avatar,
-    Modal,
-    Paper,
-    Select,
-    MenuItem,
-    InputLabel,
-    Popover,
+  Box,
+  Divider,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Pagination,
+  Typography,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
-import {
-    SectionCard,
-    StyledTextField,
-    StyledFormControl,
-    StyledSelect,
-} from "../../../styles/budgeting.styles";
-import { useState } from "react";
-import { useSelector } from "react-redux";
+import { Visibility } from "@mui/icons-material";
+
+/* ✅ FIX: DEFINE tableSx */
+const tableSx = {
+  "& thead th": {
+    position: "sticky",
+    top: 0,
+    zIndex: 1,
+    backgroundColor: "#f9fafb",
+    fontWeight: 700,
+    fontSize: "0.85rem",
+    whiteSpace: "nowrap",
+  },
+  "& tbody tr": {
+    transition: "background-color 0.2s ease",
+  },
+  "& tbody tr:hover": {
+    backgroundColor: "#f3f4f6",
+  },
+  "& td": {
+    py: 1.2,
+    fontSize: "0.85rem",
+  },
+};
 
 const BudgetTable = ({
-
-    budgets,
-    loading,
-    meta,
-    page = 1,
-    setPage,
-    search,
-    setSearch,
-    limit = 5,
-    setLimit,
-    showPagination = false,
-
+  budgets,
+  loading,
+  meta,
+  page,
+  setPage,
+  handleOpen,
 }) => {
-    const { role } = useSelector((state) => state?.auth);
-    const [isOpen, setIsOpen] = useState(false);
-    const [selectedBudget, setSelectedBudget] = useState(null);
-    const [anchorEl, setAnchorEl] = useState(null);
-    const [selectedBudgetId, setSelectedBudgetId] = useState(null);
+  return (
+    <Box sx={{ background: "#fff", borderRadius: 2 }}>
+      <Divider />
 
-    const handleCloseModal = () => {
-        setIsOpen(false);
-        setSelectedBudget(null);
-    };
+      <TableContainer>
+        <Table stickyHeader sx={tableSx}>
+          <TableHead>
+            <TableRow>
+              <TableCell>Month</TableCell>
+              <TableCell>Year</TableCell>
+              <TableCell>Allocated</TableCell>
+              <TableCell>Spent</TableCell>
+              <TableCell>Remaining</TableCell>
+              <TableCell align="center">Actions</TableCell>
+            </TableRow>
+          </TableHead>
 
-
-
-    const handleBudgetTypeChange = (newType) => {
-        if (selectedBudgetId) {
-            console.log(`Updating budget ${selectedBudgetId} to type: ${newType}`);
-        }
-        setAnchorEl(null);
-        setSelectedBudgetId(null);
-    };
-
-    const handleClosePopover = () => {
-        setAnchorEl(null);
-        setSelectedBudgetId(null);
-    };
-
-
-
-    const getBudgetTypeDisplay = (type) => (type === "normal" ? "Normal" : "Reimbursed");
-
-    const open = Boolean(anchorEl);
-    const popoverId = open ? "budget-type-popover" : undefined;
-
-    return (
-        <SectionCard>
-            {/* Filters */}
-            <Box
-                sx={{
-                    display: "flex",
-                    flexDirection: { xs: "column", sm: "row" },
-                    flexWrap: "wrap",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 2,
-                    width: "100%",
-                }}
-            >
-                {role === "superadmin" && (
-                    <StyledTextField
-                        placeholder="Search By Name..."
-                        size="medium"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        sx={{
-                            flex: 1,
-                            width: "100%", // ensures full width
-                        }}
-                    />
-                )}
-
-                {setLimit && showPagination && (
-                    <StyledFormControl
-                        size="medium"
-                        sx={{
-                            flex: 1,
-                            width: "100%", // ensures full width
-                        }}
-                    >
-                        <InputLabel>Rows per page</InputLabel>
-                        <StyledSelect
-                            MenuProps={{ disableScrollLock: true }}
-                            value={limit}
-                            onChange={(e) => setLimit(Number(e.target.value))}
-                            label="Rows per page"
-                        >
-                            {[5, 10, 20, 50, 70].map((val) => (
-                                <MenuItem key={val} value={val}>
-                                    {val}
-                                </MenuItem>
-                            ))}
-                        </StyledSelect>
-                    </StyledFormControl>
-                )}
-            </Box>
-
-
-            <Divider sx={{ py: 2 }} />
-
-            {/* Table */}
-            <TableContainer sx={{ overflowX: "auto" }}>
-                <Table >
-                    <TableHead>
-                        <TableRow>
-                            {role === "superadmin" && (
-                                <TableCell sx={{ fontWeight: "bold" }}>User Name</TableCell>
-                            )}
-                            <TableCell sx={{ fontWeight: "bold" }}>Allocated</TableCell>
-                            <TableCell sx={{ fontWeight: "bold" }}>Spent</TableCell>
-                            <TableCell sx={{ fontWeight: "bold" }}>Remaining</TableCell>
-                            <TableCell sx={{ fontWeight: "bold" }}>Company</TableCell>
-                            <TableCell sx={{ fontWeight: "bold" }}>Date</TableCell>
-
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {loading ? (
-                            <TableRow>
-                                <TableCell colSpan={role === "superadmin" ? 7 : 6} align="center">
-                                    <Typography>Loading...</Typography>
-                                </TableCell>
-                            </TableRow>
-                        ) : budgets?.length > 0 ? (
-                            budgets.map((row) => (
-                                <TableRow key={row._id} hover>
-                                    {role === "superadmin" && (
-                                        <TableCell>
-                                            <Box display="flex" alignItems="center" gap={1}>
-                                                <Avatar sx={{ bgcolor: "primary.main", width: 30, height: 30, fontSize: 14 }}>
-                                                    {row?.user?.name?.charAt(0).toUpperCase()}
-                                                </Avatar>
-                                                <Typography fontWeight={500} sx={{ fontSize: { xs: "0.8rem", sm: "0.9rem" } }}>
-                                                    {row?.user?.name}
-                                                </Typography>
-                                            </Box>
-                                        </TableCell>
-                                    )}
-                                    <TableCell sx={{ fontWeight: "bold", fontSize: { xs: "0.8rem", sm: "0.9rem" } }}>
-                                        ₹{row?.allocatedAmount?.toLocaleString()}
-                                    </TableCell>
-                                    <TableCell sx={{ fontWeight: "bold", fontSize: { xs: "0.8rem", sm: "0.9rem" } }}>
-                                        ₹{row?.spentAmount?.toLocaleString()}
-                                    </TableCell>
-                                    <TableCell sx={{ fontWeight: "bold", fontSize: { xs: "0.8rem", sm: "0.9rem" } }}>
-                                        ₹{row?.remainingAmount?.toLocaleString()}
-                                    </TableCell>
-                                    <TableCell sx={{ fontSize: { xs: "0.8rem", sm: "0.9rem" } }}>{row?.company}</TableCell>
-                                    <TableCell sx={{ fontSize: { xs: "0.75rem", sm: "0.85rem" } }}>
-                                        {row?.createdAt
-                                            ? new Date(row.createdAt).toLocaleString("en-US", {
-                                                year: "numeric",
-                                                month: "short",
-                                                day: "numeric",
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                                hour12: true,
-                                                timeZone: "Asia/Kolkata",
-                                            })
-                                            : "-"}
-                                    </TableCell>
-
-                                </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell colSpan={role === "superadmin" ? 7 : 6} align="center">
-                                    <Typography>No budgets found</Typography>
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-
-            {/* Budget Type Popover */}
-            <Popover
-                id={popoverId}
-                open={open}
-                anchorEl={anchorEl}
-                onClose={handleClosePopover}
-                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-                transformOrigin={{ vertical: "top", horizontal: "left" }}
-                sx={{ "& .MuiPopover-paper": { borderRadius: 1, minWidth: 120, p: 0 } }}
-            >
-                <Box>
-                    {["normal", "reimbursed"].map((type) => (
-                        <Box
-                            key={type}
-                            sx={{
-                                p: 1.5,
-                                cursor: "pointer",
-                                '&:hover': { backgroundColor: "#f5f7fa" },
-                                color: type === "normal" ? "#2e7d32" : "#1565c0",
-                                fontWeight: 500,
-                            }}
-                            onClick={() => handleBudgetTypeChange(type)}
-                        >
-                            {getBudgetTypeDisplay(type)}
-                        </Box>
-                    ))}
-                </Box>
-            </Popover>
-
-            {/* Pagination */}
-            {showPagination && meta?.total > 0 && setPage && (
-                <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    flexWrap="wrap"
-                    gap={1.5}
-                    p={{ xs: 1.5, sm: 2 }}
-                >
-                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: "0.75rem", sm: "0.85rem" } }}>
-                        Showing {(page - 1) * limit + 1}–{Math.min(page * limit, meta.total)} of {meta.total} entries
-                    </Typography>
-                    <Pagination
-                        count={Math.ceil(meta.total / limit)}
-                        page={page}
-                        onChange={(e, val) => setPage(val)}
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={6} align="center">
+                  Loading...
+                </TableCell>
+              </TableRow>
+            ) : budgets?.length > 0 ? (
+              budgets.map((row) => (
+                <TableRow key={row._id}>
+                  <TableCell>{row.month}</TableCell>
+                  <TableCell>{row.year}</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>
+                    ₹{row.allocatedAmount}
+                  </TableCell>
+                  <TableCell color="error">
+                    ₹{row.totalSpent || 0}
+                  </TableCell>
+                  <TableCell color="success">
+                    ₹{row.remainingBalance || 0}
+                  </TableCell>
+                  <TableCell align="center">
+                    <Tooltip title="View / Edit">
+                      <IconButton
+                        onClick={() => handleOpen(row)}
                         color="primary"
-                        size="small"
-                    />
-                </Box>
+                      >
+                        <Visibility />
+                      </IconButton>
+                    </Tooltip>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} align="center">
+                  No budgets found
+                </TableCell>
+              </TableRow>
             )}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-            {/* Optional Modal */}
-            <Modal open={isOpen} onClose={handleCloseModal}>
-                <Paper
-                    sx={{
-                        position: "absolute",
-                        top: "50%",
-                        left: "50%",
-                        transform: "translate(-50%, -50%)",
-                        width: { xs: "90%", sm: 400 },
-                        p: 3,
-                        borderRadius: 2,
-                        boxShadow: 24,
-                    }}
-                >
-                    {selectedBudget ? (
-                        <Box>
-                            <Typography variant="h6" gutterBottom>
-                                Budget Details
-                            </Typography>
-                            <Typography>
-                                <strong>User:</strong> {selectedBudget?.user?.name}
-                            </Typography>
-                            <Typography>
-                                <strong>Allocated:</strong> ₹{selectedBudget?.allocatedAmount?.toLocaleString()}
-                            </Typography>
+      {meta?.total > 0 && (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            p: 2,
+          }}
+        >
+          <Typography variant="body2" color="text.secondary">
+            Showing {(page - 1) * meta.limit + 1} –{" "}
+            {Math.min(page * meta.limit, meta.total)} of {meta.total}
+          </Typography>
 
-                            <Typography>
-                                <strong>Date:</strong>{" "}
-                                {new Date(selectedBudget?.createdAt).toLocaleString("en-US", {
-                                    year: "numeric",
-                                    month: "short",
-                                    day: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                    hour12: true,
-                                    timeZone: "Asia/Kolkata",
-                                })}
-                            </Typography>
-                        </Box>
-                    ) : (
-                        <Typography>No budget selected</Typography>
-                    )}
-                </Paper>
-            </Modal>
-        </SectionCard>
-    );
+          <Pagination
+            count={Math.ceil(meta.total / meta.limit)}
+            page={page}
+            onChange={(_, val) => setPage(val)}
+            color="primary"
+          />
+        </Box>
+      )}
+    </Box>
+  );
 };
 
 export default BudgetTable;
