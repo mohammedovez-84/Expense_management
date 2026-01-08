@@ -6,7 +6,6 @@ import { useToastMessage } from '../../hooks/useToast';
 // Material-UI Components
 import {
     Box,
-    Paper,
     Typography,
     TextField,
     Button,
@@ -35,7 +34,12 @@ import {
     Stack,
     Tooltip,
     CircularProgress,
-    InputLabel
+    InputLabel,
+    Pagination,
+    keyframes,
+    styled,
+    GlobalStyles,
+    alpha
 } from '@mui/material';
 
 // Material-UI Icons
@@ -51,21 +55,299 @@ import {
     Close as CloseIcon,
     CheckCircle as CheckCircleIcon,
     Key as KeyIcon,
-    Email as EmailIcon
+    Email as EmailIcon,
+    FilterList,
+    Download,
+    Group,
+    Security,
+    VerifiedUser,
+    TrendingUp,
+    TrendingDown
 } from '@mui/icons-material';
-import { PrimaryButton, StyledFormControl, StyledSelect, StyledTextField } from '../../styles/budgeting.styles';
+
+// Animation keyframes
+const floatAnimation = keyframes`
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+`;
+
+const pulseAnimation = keyframes`
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+`;
+
+const slideInFromLeft = keyframes`
+  from { transform: translateX(-20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+`;
+
+const slideInFromRight = keyframes`
+  from { transform: translateX(20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+`;
+
+const fadeIn = keyframes`
+  from { opacity: 0; }
+  to { opacity: 1; }
+`;
+
+const gradientAnimation = keyframes`
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+`;
+
+// Styled Components with Poppins font
+const GlassCard = styled(Card)(({ theme, cardcolor }) => ({
+    background: `linear-gradient(135deg, 
+    ${alpha(cardcolor || theme.palette.primary.main, 0.1)} 0%, 
+    ${alpha(theme.palette.background.paper, 0.8)} 100%)`,
+    backdropFilter: 'blur(10px)',
+    border: `1px solid ${alpha(cardcolor || theme.palette.primary.main, 0.1)}`,
+    borderRadius: '16px',
+    position: 'relative',
+    overflow: 'hidden',
+    transition: 'all 0.3s ease',
+    fontFamily: '"Poppins", "Roboto", "Helvetica", "Arial", sans-serif',
+    '&:hover': {
+        transform: 'translateY(-8px)',
+        boxShadow: `0 20px 40px ${alpha(cardcolor || theme.palette.primary.main, 0.15)}`,
+        border: `1px solid ${alpha(cardcolor || theme.palette.primary.main, 0.3)}`,
+    },
+    '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '4px',
+        background: `linear-gradient(90deg, ${cardcolor || theme.palette.primary.main}, ${alpha(cardcolor || theme.palette.primary.main, 0.5)})`,
+    },
+    '&::after': {
+        content: '""',
+        position: 'absolute',
+        top: '-50%',
+        left: '-50%',
+        width: '200%',
+        height: '200%',
+        background: `conic-gradient(transparent, ${alpha(cardcolor || theme.palette.primary.main, 0.1)}, transparent 30%)`,
+        animation: `${gradientAnimation} 3s linear infinite`,
+        pointerEvents: 'none',
+    }
+}));
+
+const PoppinsTypography = styled(Typography)({
+    fontFamily: '"Poppins", "Roboto", "Helvetica", "Arial", sans-serif',
+});
+
+const GlassDialog = styled(Dialog)(({ theme }) => ({
+    '& .MuiDialog-paper': {
+        background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.background.paper, 0.95)} 100%)`,
+        backdropFilter: 'blur(20px)',
+        border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+        borderRadius: '24px',
+        boxShadow: `0 20px 60px ${alpha(theme.palette.primary.main, 0.2)}`
+    }
+}));
+
+const GlassTextField = styled(TextField)(({ theme }) => ({
+    '& .MuiOutlinedInput-root': {
+        borderRadius: '12px',
+        background: alpha(theme.palette.background.paper, 0.7),
+        border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+        transition: 'all 0.3s ease',
+        fontFamily: '"Poppins", sans-serif',
+        '&:hover': {
+            borderColor: alpha(theme.palette.primary.main, 0.3),
+            background: alpha(theme.palette.background.paper, 0.9),
+        },
+        '&.Mui-focused': {
+            borderColor: theme.palette.primary.main,
+            boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.1)}`,
+            background: alpha(theme.palette.background.paper, 0.95),
+        }
+    },
+    '& .MuiInputLabel-root': {
+        fontFamily: '"Poppins", sans-serif',
+        fontWeight: 500,
+    },
+    '& .MuiInputBase-input': {
+        fontFamily: '"Poppins", sans-serif',
+    }
+}));
+
+const GlassSelect = styled(FormControl)(({ theme }) => ({
+    '& .MuiOutlinedInput-root': {
+        borderRadius: '12px',
+        background: alpha(theme.palette.background.paper, 0.7),
+        border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+        transition: 'all 0.3s ease',
+        fontFamily: '"Poppins", sans-serif',
+        '&:hover': {
+            borderColor: alpha(theme.palette.primary.main, 0.3),
+            background: alpha(theme.palette.background.paper, 0.9),
+        },
+        '&.Mui-focused': {
+            borderColor: theme.palette.primary.main,
+            boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.1)}`,
+            background: alpha(theme.palette.background.paper, 0.95),
+        }
+    },
+    '& .MuiInputLabel-root': {
+        fontFamily: '"Poppins", sans-serif',
+        fontWeight: 500,
+    }
+}));
+
+const PrimaryButton = styled(Button)(({ theme }) => ({
+    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+    color: 'white',
+    borderRadius: '12px',
+    padding: '10px 24px',
+    fontFamily: '"Poppins", sans-serif',
+    fontWeight: 600,
+    textTransform: 'none',
+    transition: 'all 0.3s ease',
+    '&:hover': {
+        transform: 'translateY(-2px)',
+        boxShadow: `0 8px 25px ${alpha(theme.palette.primary.main, 0.4)}`,
+    },
+    '&:disabled': {
+        background: alpha(theme.palette.primary.main, 0.5),
+    }
+}));
+
+const StatCard = React.memo(({ stat, index }) => {
+    const theme = useTheme();
+    const [hovered, setHovered] = useState(false);
+
+    return (
+        <GlassCard
+            cardcolor={stat.color}
+            sx={{
+                animation: `${slideInFromLeft} 0.5s ease forwards`,
+                animationDelay: `${index * 0.1}s`,
+                opacity: 0,
+                height: '100%',
+                minHeight: '140px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between'
+            }}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+        >
+            <CardContent sx={{
+                p: { xs: 2, sm: 2.5, md: 3 },
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between'
+            }}>
+                <Box sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    mb: 2,
+                    gap: 1
+                }}>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <PoppinsTypography
+                            variant="subtitle2"
+                            sx={{
+                                color: 'text.secondary',
+                                fontWeight: 500,
+                                mb: 1,
+                                fontSize: { xs: '0.75rem', sm: '0.813rem', md: '0.875rem' },
+                                letterSpacing: '0.3px',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis'
+                            }}
+                        >
+                            {stat.title}
+                        </PoppinsTypography>
+                        <PoppinsTypography
+                            variant="h4"
+                            sx={{
+                                fontWeight: 700,
+                                color: stat.color,
+                                mb: 1,
+                                fontSize: { xs: '1.25rem', sm: '1.5rem', md: '1.75rem', lg: '2rem' },
+                                letterSpacing: '-0.5px',
+                                lineHeight: 1.2,
+                                wordBreak: 'break-all'
+                            }}
+                        >
+                            {stat.value}
+                        </PoppinsTypography>
+                        <PoppinsTypography
+                            variant="caption"
+                            sx={{
+                                color: 'text.secondary',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 0.5,
+                                fontWeight: 400,
+                                fontSize: { xs: '0.7rem', sm: '0.75rem' }
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    width: '4px',
+                                    height: '4px',
+                                    borderRadius: '50%',
+                                    backgroundColor: alpha(stat.color, 0.5),
+                                    flexShrink: 0
+                                }}
+                            />
+                            <Box sx={{
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis'
+                            }}>
+                                {stat.subtitle}
+                            </Box>
+                        </PoppinsTypography>
+                    </Box>
+
+                    <Box sx={{
+                        width: { xs: 44, sm: 48, md: 52 },
+                        height: { xs: 44, sm: 48, md: 52 },
+                        borderRadius: '14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: stat.bgGradient || `linear-gradient(135deg, ${stat.color} 0%, ${alpha(stat.color, 0.7)} 100%)`,
+                        color: 'white',
+                        animation: hovered ? `${floatAnimation} 2s ease-in-out infinite` : 'none',
+                        transition: 'all 0.3s ease',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        boxShadow: `0 4px 20px ${alpha(stat.color, 0.3)}`,
+                        flexShrink: 0,
+                    }}>
+                        {React.cloneElement(stat.icon, { sx: { fontSize: { xs: 22, sm: 24, md: 26 } } })}
+                    </Box>
+                </Box>
+            </CardContent>
+        </GlassCard>
+    );
+});
 
 const UserDashboard = () => {
     const departments = [
-        { value: 'GENERAL', label: 'General' },
-        { value: 'HR', label: 'HR' },
-        { value: 'IT', label: 'IT' },
-        { value: 'DATA', label: 'Data' },
-        { value: 'SALES', label: 'Sales' }
+        { value: 'GENERAL', label: 'General', color: '#3b82f6' },
+        { value: 'HR', label: 'HR', color: '#ef4444' },
+        { value: 'IT', label: 'IT', color: '#10b981' },
+        { value: 'DATA', label: 'Data', color: '#8b5cf6' },
+        { value: 'SALES', label: 'Sales', color: '#f59e0b' }
     ];
+
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-
 
     // State management
     const dispatch = useDispatch();
@@ -96,6 +378,10 @@ const UserDashboard = () => {
         confirmPassword: ''
     });
 
+    const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10);
+
     // Toggle password visibility
     const togglePasswordVisibility = (field) => {
         setPasswordVisible(prev => ({
@@ -117,7 +403,7 @@ const UserDashboard = () => {
                 setNewUser({
                     name: '',
                     password: '',
-                    department: ''
+                    department: departments[0].value
                 });
             } else {
                 error("Error in creating the user");
@@ -194,9 +480,6 @@ const UserDashboard = () => {
         }
     };
 
-    // Department options
-
-
     // Format last login date
     const formatLastLogin = (user) => {
         if (!user?.sessions?.length) return '-';
@@ -213,460 +496,797 @@ const UserDashboard = () => {
         });
     };
 
+    // Filter users based on search term
+    const filteredUsers = users?.filter(user =>
+        user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user?.department?.toLowerCase().includes(searchTerm.toLowerCase())
+    ) || [];
+
+    // Pagination logic
+    const indexOfLastUser = currentPage * itemsPerPage;
+    const indexOfFirstUser = indexOfLastUser - itemsPerPage;
+    const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+    const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+
+    const handlePageChange = (event, value) => {
+        setCurrentPage(value);
+    };
+
+    // Get department color
+    const getDepartmentColor = (department) => {
+        const dept = departments.find(d => d.value === department);
+        return dept?.color || '#6b7280';
+    };
+
+    // Stats data
+    const stats = [
+        {
+            title: "Total Users",
+            value: users?.length || 0,
+            color: "#3b82f6",
+            icon: <Group />,
+            subtitle: "Active users in system",
+            bgGradient: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
+            trend: "+12.5%",
+            trendColor: "#10b981"
+        },
+        {
+            title: "Active Sessions",
+            value: users?.filter(u => u?.sessions?.length > 0).length || 0,
+            color: "#10b981",
+            icon: <VerifiedUser />,
+            subtitle: "Currently logged in",
+            bgGradient: "linear-gradient(135deg, #10b981 0%, #047857 100%)",
+            trend: "+8.3%",
+            trendColor: "#10b981"
+        },
+        {
+            title: "IT Department",
+            value: users?.filter(u => u?.department === 'IT').length || 0,
+            color: "#8b5cf6",
+            icon: <BusinessIcon />,
+            subtitle: "IT team members",
+            bgGradient: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)",
+            trend: "+5.2%",
+            trendColor: "#8b5cf6"
+        },
+        {
+            title: "Admin Privileges",
+            value: users?.filter(u => u?.isAdmin).length || 0,
+            color: "#f59e0b",
+            icon: <Security />,
+            subtitle: "Administrative users",
+            bgGradient: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+            trend: "+2.1%",
+            trendColor: "#f59e0b"
+        },
+    ];
+
     return (
-        <Box >
-            {/* Add New User Section */}
-            <Paper
-                elevation={0}
-                sx={{
-                    p: { xs: 2, md: 3 },
-                    mb: 3,
-                    background: 'linear-gradient(135deg, #f5f7ff 0%, #f0f4ff 100%)',
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    borderRadius: 2,
-                }}
-            >
-                <Typography
-                    variant="h5"
-                    component="h2"
-                    gutterBottom
-                    sx={{
+        <>
+            <GlobalStyles styles={{
+                '@import': 'url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap")',
+                'body': {
+                    fontFamily: '"Poppins", "Roboto", "Helvetica", "Arial", sans-serif',
+                },
+                '::-webkit-scrollbar': {
+                    width: '10px',
+                    height: '10px'
+                },
+                '::-webkit-scrollbar-track': {
+                    background: 'linear-gradient(180deg, #f1f1f1 0%, #e1e1e1 100%)',
+                    borderRadius: '10px'
+                },
+                '::-webkit-scrollbar-thumb': {
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    borderRadius: '10px',
+                    '&:hover': {
+                        background: 'linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)'
+                    }
+                },
+            }} />
+
+            <Box sx={{
+                p: { xs: 1.5, sm: 2, md: 3 },
+                minHeight: "100vh",
+                background: `linear-gradient(135deg, ${alpha(theme.palette.background.default, 0.8)} 0%, ${alpha(theme.palette.background.paper, 0.9)} 100%)`,
+                position: 'relative',
+                overflow: 'hidden',
+                fontFamily: '"Poppins", sans-serif',
+                '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: `radial-gradient(circle at 20% 80%, ${alpha(theme.palette.primary.main, 0.05)} 0%, transparent 50%)`,
+                    pointerEvents: 'none'
+                }
+            }}>
+                {/* Header Section */}
+                <Box sx={{
+                    mb: 4,
+                    animation: `${fadeIn} 0.6s ease forwards`
+                }}>
+                    <Box sx={{
                         display: 'flex',
-                        alignItems: 'center',
-                        fontWeight: 600,
-                        color: 'primary.main',
-                    }}
-                >
-                    <AddIcon sx={{ mr: 1 }} />
-                    Add New User
-                </Typography>
-
-                <Box sx={{ mt: 2 }} component="form" onSubmit={handleAddUser}>
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: 2,
-                            alignItems: 'flex-end',
-                        }}
-                    >
-                        {/* Full Name Field - Takes available space */}
-                        <StyledTextField
-                            label="Full Name"
-                            name="name"
-                            value={newUser.name}
-                            onChange={handleInputChange}
-                            required
-                            placeholder="Enter full name"
-                            size="small"
-                            sx={{ flex: '1 1 200px' }}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <PersonIcon color="action" />
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-
-                        {/* Password Field - Takes available space */}
-                        <StyledTextField
-                            label="Password"
-                            name="password"
-                            type={passwordVisible.createPassword ? "text" : "password"}
-                            value={newUser.password}
-                            onChange={handleInputChange}
-                            required
-                            placeholder="Enter password"
-                            inputProps={{ minLength: 6 }}
-                            size="small"
-                            sx={{ flex: '1 1 180px' }}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <LockIcon color="action" />
-                                    </InputAdornment>
-                                ),
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <IconButton
-                                            onClick={() => togglePasswordVisibility('createPassword')}
-                                            edge="end"
-                                            size="small"
-                                        >
-                                            {passwordVisible.createPassword ?
-                                                <VisibilityOffIcon /> :
-                                                <VisibilityIcon />
-                                            }
-                                        </IconButton>
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-
-                        {/* Department Field - Takes available space */}
-                        <StyledFormControl size="small" sx={{ flex: '1 1 180px' }}>
-                            <InputLabel sx={{ fontWeight: 600 }}>Department</InputLabel>
-                            <StyledSelect
-                                MenuProps={{ disableScrollLock: true }}
-                                select
-                                label="Department"
-                                name="department"
-                                value={newUser.department || ''}
-                                onChange={handleInputChange}
-                                required
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <BusinessIcon color="action" />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            >
-                                <MenuItem value="">
-                                    <em>Select Department</em>
-                                </MenuItem>
-                                {departments.map((dept) => (
-                                    <MenuItem key={dept.value} value={dept.value}>
-                                        {dept.label}
-                                    </MenuItem>
-                                ))}
-                            </StyledSelect>
-                        </StyledFormControl>
-
-                        {/* Submit Button - Fixed width */}
-                        <PrimaryButton
-                            type="submit"
-                            variant="contained"
-                            size="medium"
-                            startIcon={<AddIcon />}
-                            sx={{
-                                height: '50px',
-                                borderRadius: 2,
-                                minWidth: '120px',
-                                flex: '0 0 auto'
-                            }}
-                        >
-                            Add User
-                        </PrimaryButton>
+                        justifyContent: 'space-between',
+                        alignItems: 'flex-start',
+                        flexWrap: 'wrap',
+                        gap: 2
+                    }}>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <PoppinsTypography variant="h4" sx={{
+                                fontWeight: 700,
+                                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                mb: 1,
+                                fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' },
+                                letterSpacing: '-0.5px',
+                                lineHeight: 1.2
+                            }}>
+                                User Management Dashboard
+                            </PoppinsTypography>
+                            <PoppinsTypography variant="body1" sx={{
+                                color: 'text.secondary',
+                                maxWidth: '600px',
+                                fontWeight: 400,
+                                fontSize: { xs: '0.875rem', sm: '0.95rem' },
+                                lineHeight: 1.5
+                            }}>
+                                Manage users, permissions, and access across your organization
+                            </PoppinsTypography>
+                        </Box>
                     </Box>
                 </Box>
-            </Paper>
 
-            {/* Users List Section */}
-            <Paper
-                elevation={0}
-                sx={{
-                    p: { xs: 2, sm: 3 },
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    borderRadius: 2,
-                    overflow: 'hidden' // Prevents horizontal scrolling issues
-                }}
-            >
-                <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 600 }}>
-                    Users List
-                </Typography>
+                {/* Stats Cards */}
+                <Box sx={{
+                    mb: 4,
+                    display: 'grid',
+                    gridTemplateColumns: {
+                        xs: '1fr',
+                        sm: 'repeat(2, 1fr)',
+                        md: 'repeat(4, 1fr)'
+                    },
+                    gap: 3
+                }}>
+                    {stats.map((stat, index) => (
+                        <Box
+                            key={index}
+                            sx={{
+                                animation: `${slideInFromLeft} 0.5s ease forwards`,
+                                animationDelay: `${index * 0.1}s`,
+                                opacity: 0
+                            }}
+                        >
+                            <StatCard stat={stat} index={index} />
+                        </Box>
+                    ))}
+                </Box>
 
-                {loading ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-                        <CircularProgress />
-                    </Box>
-                ) : users?.length === 0 ? (
-                    <Box sx={{ textAlign: 'center', p: 4 }}>
-                        <SearchIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-                        <Typography variant="h6" color="text.secondary" gutterBottom>
-                            No users found
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            Try adjusting your search criteria
-                        </Typography>
-                    </Box>
-                ) : isMobile ? (
-                    // Mobile Card View
-                    <Stack spacing={2}>
-                        {users?.map((user) => (
-                            <Card key={user?._id} variant="outlined">
-                                <CardContent>
-                                    <Stack spacing={2}>
-                                        {/* User Info */}
-                                        <Box sx={{ maxWidth: '100%', overflow: 'hidden' }}>
-                                            <Typography variant="h6" fontWeight="600" noWrap>
-                                                {user?.name}
-                                            </Typography>
-                                            <Typography
-                                                variant="body2"
-                                                color="primary"
-                                                sx={{
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    mt: 0.5,
-                                                    minWidth: 0 // Important for flex truncation
-                                                }}
-                                                noWrap
-                                            >
-                                                <EmailIcon fontSize="small" sx={{ mr: 0.5, flexShrink: 0 }} />
-                                                <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                                    {user?.email}
-                                                </Box>
-                                            </Typography>
-                                        </Box>
+                {/* Add New User Section */}
+                <GlassCard sx={{ mb: 4 }}>
+                    <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 1 }}>
+                            <Box sx={{ minWidth: 0 }}>
+                                <PoppinsTypography variant="h6" sx={{ fontWeight: 600, mb: 0.5, fontSize: { xs: '1rem', sm: '1.1rem' } }}>
+                                    <AddIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+                                    Add New User
+                                </PoppinsTypography>
+                                <PoppinsTypography variant="body2" sx={{ color: 'text.secondary', fontWeight: 400, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
+                                    Create new user accounts with specific permissions
+                                </PoppinsTypography>
+                            </Box>
+                        </Box>
 
-                                        {/* Department & Status */}
-                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <Chip
-                                                icon={<BusinessIcon />}
-                                                label={user?.department}
-                                                size="small"
-                                                variant="outlined"
-                                            />
-                                            <Chip
-                                                icon={<CheckCircleIcon />}
-                                                label="Active"
-                                                color="success"
-                                                size="small"
-                                                variant="outlined"
-                                            />
-                                        </Box>
-
-                                        {/* Last Login */}
-                                        <Typography variant="body2" color="text.secondary">
-                                            <strong>Last Login:</strong> {formatLastLogin(user)}
-                                        </Typography>
-
-                                        {/* Action Button */}
-                                        <Button
-                                            fullWidth
-                                            variant="outlined"
-                                            startIcon={<LockResetIcon />}
-                                            onClick={() => openResetPasswordModal(user?._id, user?.name)}
-                                            size="small"
+                        <Box sx={{ mt: 2 }} component="form" onSubmit={handleAddUser}>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} md={4}>
+                                    <GlassTextField
+                                        fullWidth
+                                        label="Full Name"
+                                        name="name"
+                                        value={newUser.name}
+                                        onChange={handleInputChange}
+                                        required
+                                        placeholder="Enter full name"
+                                        size="small"
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <PersonIcon color="action" />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={4}>
+                                    <GlassTextField
+                                        fullWidth
+                                        label="Password"
+                                        name="password"
+                                        type={passwordVisible.createPassword ? "text" : "password"}
+                                        value={newUser.password}
+                                        onChange={handleInputChange}
+                                        required
+                                        placeholder="Enter password"
+                                        inputProps={{ minLength: 6 }}
+                                        size="small"
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <LockIcon color="action" />
+                                                </InputAdornment>
+                                            ),
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <IconButton
+                                                        onClick={() => togglePasswordVisibility('createPassword')}
+                                                        edge="end"
+                                                        size="small"
+                                                    >
+                                                        {passwordVisible.createPassword ?
+                                                            <VisibilityOffIcon /> :
+                                                            <VisibilityIcon />
+                                                        }
+                                                    </IconButton>
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={3}>
+                                    <GlassSelect fullWidth size="small">
+                                        <InputLabel sx={{ fontFamily: '"Poppins", sans-serif' }}>Department</InputLabel>
+                                        <Select
+                                            MenuProps={{ disableScrollLock: true }}
+                                            label="Department"
+                                            name="department"
+                                            value={newUser.department || ''}
+                                            onChange={handleInputChange}
+                                            required
                                         >
-                                            Reset Password
-                                        </Button>
-                                    </Stack>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </Stack>
-                ) : (
-                    // Desktop Table View - FIXED RESPONSIVENESS
-                    <TableContainer
-                        sx={{
-                            maxWidth: '100%',
-                            overflowX: 'auto',
-                            '& .MuiTableCell-root': {
-                                py: 2,
-                                px: { xs: 1, sm: 2 }
-                            }
-                        }}
-                    >
-                        <Table sx={{ minWidth: 800 }}> {/* Set minimum width for table */}
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell sx={{ fontWeight: 600, minWidth: 200 }}>User Information</TableCell>
-                                    <TableCell sx={{ fontWeight: 600, minWidth: 180 }}>Contact & Department</TableCell>
-                                    <TableCell sx={{ fontWeight: 600, minWidth: 150 }}>Actions</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {users?.map((user) => (
-                                    <TableRow
-                                        key={user?._id}
-                                        hover
-                                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                            {departments.map((dept) => (
+                                                <MenuItem key={dept.value} value={dept.value} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                        <Box sx={{
+                                                            width: 8,
+                                                            height: 8,
+                                                            borderRadius: '50%',
+                                                            backgroundColor: dept.color
+                                                        }} />
+                                                        {dept.label}
+                                                    </Box>
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </GlassSelect>
+                                </Grid>
+                                <Grid item xs={12} md={1}>
+                                    <PrimaryButton
+                                        type="submit"
+                                        variant="contained"
+                                        fullWidth
+                                        size="large"
+                                        sx={{ height: '40px' }}
                                     >
-                                        <TableCell>
-                                            <Box>
-                                                <Typography variant="subtitle1" fontWeight="600" noWrap>
-                                                    {user?.name}
-                                                </Typography>
-                                                <Typography variant="body2" color="text.secondary" noWrap>
+                                        Add
+                                    </PrimaryButton>
+                                </Grid>
+                            </Grid>
+                        </Box>
+                    </CardContent>
+                </GlassCard>
+
+                {/* Users List Section */}
+                <GlassCard>
+                    <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                        <Box sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            mb: 3,
+                            flexWrap: 'wrap',
+                            gap: 2
+                        }}>
+                            <Box sx={{ minWidth: 0 }}>
+                                <PoppinsTypography variant="h6" sx={{
+                                    fontWeight: 600,
+                                    mb: 0.5,
+                                    fontSize: { xs: '1rem', sm: '1.1rem' }
+                                }}>
+                                    Users List
+                                </PoppinsTypography>
+                                <PoppinsTypography variant="body2" sx={{
+                                    color: 'text.secondary',
+                                    fontWeight: 400,
+                                    fontSize: { xs: '0.8rem', sm: '0.875rem' }
+                                }}>
+                                    Manage and review all user accounts
+                                </PoppinsTypography>
+                            </Box>
+
+                            <Box sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 2,
+                                flexWrap: 'wrap',
+                                flexShrink: 0
+                            }}>
+                                <GlassTextField
+                                    size="small"
+                                    placeholder="Search users..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    sx={{ width: { xs: '100%', sm: 200 } }}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <SearchIcon color="action" />
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                />
+                            </Box>
+                        </Box>
+
+                        {loading ? (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+                                <CircularProgress />
+                            </Box>
+                        ) : filteredUsers?.length === 0 ? (
+                            <Box sx={{
+                                height: 300,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexDirection: 'column',
+                                gap: 2
+                            }}>
+                                <Box sx={{
+                                    width: 80,
+                                    height: 80,
+                                    borderRadius: '50%',
+                                    background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    animation: `${floatAnimation} 3s ease-in-out infinite`
+                                }}>
+                                    <SearchIcon sx={{ fontSize: 40, color: alpha(theme.palette.primary.main, 0.5) }} />
+                                </Box>
+                                <PoppinsTypography variant="h6" color="text.secondary" align="center">
+                                    No users found
+                                </PoppinsTypography>
+                                <PoppinsTypography variant="body2" color="text.secondary" align="center">
+                                    Try adjusting your search criteria
+                                </PoppinsTypography>
+                            </Box>
+                        ) : isMobile ? (
+                            // Mobile Card View
+                            <Stack spacing={2}>
+                                {currentUsers?.map((user) => (
+                                    <GlassCard key={user?._id}>
+                                        <CardContent>
+                                            <Stack spacing={2}>
+                                                {/* User Info */}
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                    <Avatar
+                                                        sx={{
+                                                            bgcolor: alpha(getDepartmentColor(user?.department), 0.1),
+                                                            color: getDepartmentColor(user?.department),
+                                                            width: 48,
+                                                            height: 48,
+                                                            fontWeight: 600,
+                                                            fontFamily: '"Poppins", sans-serif',
+                                                        }}
+                                                    >
+                                                        {user?.name?.charAt(0).toUpperCase()}
+                                                    </Avatar>
+                                                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                                                        <PoppinsTypography variant="subtitle1" fontWeight="600" noWrap>
+                                                            {user?.name}
+                                                        </PoppinsTypography>
+                                                        <PoppinsTypography
+                                                            variant="body2"
+                                                            color="primary"
+                                                            sx={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                mt: 0.5,
+                                                                minWidth: 0
+                                                            }}
+                                                            noWrap
+                                                        >
+                                                            <EmailIcon fontSize="small" sx={{ mr: 0.5, flexShrink: 0 }} />
+                                                            <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                                {user?.email}
+                                                            </Box>
+                                                        </PoppinsTypography>
+                                                    </Box>
+                                                </Box>
+
+                                                {/* Department & Status */}
+                                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <Chip
+                                                        icon={<BusinessIcon />}
+                                                        label={user?.department}
+                                                        size="small"
+                                                        sx={{
+                                                            background: alpha(getDepartmentColor(user?.department), 0.1),
+                                                            color: getDepartmentColor(user?.department),
+                                                            border: `1px solid ${alpha(getDepartmentColor(user?.department), 0.2)}`
+                                                        }}
+                                                    />
+                                                    <Chip
+                                                        icon={<CheckCircleIcon />}
+                                                        label={user?.isAdmin ? "Admin" : "User"}
+                                                        color={user?.isAdmin ? "success" : "default"}
+                                                        size="small"
+                                                        variant="outlined"
+                                                    />
+                                                </Box>
+
+                                                {/* Last Login */}
+                                                <Typography variant="body2" color="text.secondary">
                                                     <strong>Last Login:</strong> {formatLastLogin(user)}
                                                 </Typography>
-                                            </Box>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                                                <Typography
-                                                    variant="body2"
-                                                    color="primary"
-                                                    sx={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        fontWeight: 600
-                                                    }}
-                                                    noWrap
-                                                >
-                                                    <EmailIcon fontSize="small" sx={{ mr: 0.5, flexShrink: 0 }} />
-                                                    {user?.email}
-                                                </Typography>
-                                                <Chip
-                                                    icon={<BusinessIcon />}
-                                                    label={user?.department}
-                                                    size="small"
-                                                    variant="outlined"
-                                                    sx={{ width: 'fit-content' }}
-                                                />
-                                            </Box>
-                                        </TableCell>
-                                        {/*  */}
-                                        <TableCell>
-                                            <Tooltip title="Reset Password">
+
+                                                {/* Action Button */}
                                                 <Button
+                                                    fullWidth
                                                     variant="outlined"
                                                     startIcon={<LockResetIcon />}
                                                     onClick={() => openResetPasswordModal(user?._id, user?.name)}
                                                     size="small"
+                                                    sx={{
+                                                        borderRadius: '8px',
+                                                        borderColor: alpha(theme.palette.primary.main, 0.2),
+                                                        '&:hover': {
+                                                            borderColor: theme.palette.primary.main,
+                                                            background: alpha(theme.palette.primary.main, 0.04)
+                                                        }
+                                                    }}
                                                 >
-                                                    Reset
+                                                    Reset Password
                                                 </Button>
-                                            </Tooltip>
-                                        </TableCell>
-                                    </TableRow>
+                                            </Stack>
+                                        </CardContent>
+                                    </GlassCard>
                                 ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                )}
-            </Paper>
+                            </Stack>
+                        ) : (
+                            // Desktop Table View
+                            <>
+                                <TableContainer
+                                    sx={{
+                                        maxWidth: '100%',
+                                        overflowX: 'auto',
+                                        borderRadius: '12px',
+                                        border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                                        '& .MuiTableCell-root': {
+                                            py: 2,
+                                            px: { xs: 1, sm: 2 },
+                                            borderColor: alpha(theme.palette.divider, 0.1)
+                                        }
+                                    }}
+                                >
+                                    <Table>
+                                        <TableHead>
+                                            <TableRow sx={{
+                                                background: alpha(theme.palette.primary.main, 0.05),
+                                                '& th': {
+                                                    fontWeight: 600,
+                                                    fontFamily: '"Poppins", sans-serif',
+                                                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                                                    color: theme.palette.text.primary
+                                                }
+                                            }}>
+                                                <TableCell>User</TableCell>
+                                                <TableCell>Department</TableCell>
+                                                <TableCell>Last Login</TableCell>
+                                                <TableCell>Status</TableCell>
+                                                <TableCell align="center">Actions</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {currentUsers?.map((user) => (
+                                                <TableRow
+                                                    key={user?._id}
+                                                    hover
+                                                    sx={{
+                                                        '&:hover': {
+                                                            background: alpha(theme.palette.primary.main, 0.03),
+                                                        },
+                                                        '&:last-child td': { border: 0 }
+                                                    }}
+                                                >
+                                                    <TableCell>
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                            <Avatar
+                                                                sx={{
+                                                                    bgcolor: alpha(getDepartmentColor(user?.department), 0.1),
+                                                                    color: getDepartmentColor(user?.department),
+                                                                    width: 40,
+                                                                    height: 40,
+                                                                    fontWeight: 600,
+                                                                    fontFamily: '"Poppins", sans-serif',
+                                                                }}
+                                                            >
+                                                                {user?.name?.charAt(0).toUpperCase()}
+                                                            </Avatar>
+                                                            <Box sx={{ minWidth: 0 }}>
+                                                                <PoppinsTypography variant="subtitle2" fontWeight="600" noWrap>
+                                                                    {user?.name}
+                                                                </PoppinsTypography>
+                                                                <PoppinsTypography
+                                                                    variant="caption"
+                                                                    color="primary"
+                                                                    sx={{
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        fontWeight: 500
+                                                                    }}
+                                                                    noWrap
+                                                                >
+                                                                    <EmailIcon fontSize="small" sx={{ mr: 0.5, flexShrink: 0 }} />
+                                                                    {user?.email}
+                                                                </PoppinsTypography>
+                                                            </Box>
+                                                        </Box>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Chip
+                                                            icon={<BusinessIcon />}
+                                                            label={user?.department}
+                                                            size="small"
+                                                            sx={{
+                                                                background: alpha(getDepartmentColor(user?.department), 0.1),
+                                                                color: getDepartmentColor(user?.department),
+                                                                border: `1px solid ${alpha(getDepartmentColor(user?.department), 0.2)}`,
+                                                                fontFamily: '"Poppins", sans-serif',
+                                                                fontWeight: 500
+                                                            }}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <PoppinsTypography variant="body2" sx={{ fontWeight: 400, color: 'text.secondary' }}>
+                                                            {formatLastLogin(user)}
+                                                        </PoppinsTypography>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Chip
+                                                            icon={<CheckCircleIcon />}
+                                                            label={user?.isAdmin ? "Administrator" : "Standard User"}
+                                                            color={user?.isAdmin ? "success" : "default"}
+                                                            size="small"
+                                                            variant="outlined"
+                                                            sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 500 }}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell align="center">
+                                                        <Tooltip title="Reset Password">
+                                                            <IconButton
+                                                                onClick={() => openResetPasswordModal(user?._id, user?.name)}
+                                                                sx={{
+                                                                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                                                                    color: theme.palette.primary.main,
+                                                                    border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                                                                    borderRadius: 2,
+                                                                    width: 40,
+                                                                    height: 40,
+                                                                    '&:hover': {
+                                                                        backgroundColor: theme.palette.primary.main,
+                                                                        color: 'white',
+                                                                        transform: 'scale(1.05)',
+                                                                    },
+                                                                    transition: 'all 0.2s ease-in-out',
+                                                                    animation: `${pulseAnimation} 2s infinite`
+                                                                }}
+                                                            >
+                                                                <LockResetIcon sx={{ fontSize: 20 }} />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
 
-            {/* Reset Password Modal */}
-            <Dialog
-                open={resetPasswordModal.isOpen}
-                onClose={closeResetPasswordModal}
-                maxWidth="sm"
-                fullWidth
-                PaperProps={{
-                    sx: { borderRadius: 2 }
-                }}
-            >
-                <DialogTitle sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    borderBottom: '1px solid',
-                    borderColor: 'divider',
-                    pb: 2
-                }}>
-                    <LockResetIcon sx={{ mr: 1, color: 'primary.main' }} />
-                    Reset Password
-                    <IconButton
-                        aria-label="close"
-                        onClick={closeResetPasswordModal}
-                        sx={{
-                            position: 'absolute',
-                            right: 8,
-                            top: 8,
-                            color: 'text.secondary',
-                        }}
-                    >
-                        <CloseIcon />
-                    </IconButton>
-                </DialogTitle>
+                                {/* Pagination */}
+                                {totalPages > 1 && (
+                                    <Box
+                                        sx={{
+                                            mt: 3,
+                                            pt: 3,
+                                            borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                                            width: '100%',
+                                        }}
+                                    >
+                                        <Stack
+                                            direction={{ xs: 'column', sm: 'row' }}
+                                            justifyContent="space-between"
+                                            alignItems={{ xs: 'flex-start', sm: 'center' }}
+                                            spacing={2}
+                                        >
+                                            <PoppinsTypography variant="body2" color="text.secondary" sx={{
+                                                fontWeight: 400,
+                                                fontSize: { xs: '0.75rem', sm: '0.875rem' }
+                                            }}>
+                                                Showing {indexOfFirstUser + 1}–{Math.min(indexOfLastUser, filteredUsers.length)} of {filteredUsers.length} users
+                                            </PoppinsTypography>
 
-                <DialogContent sx={{ mt: 3 }}>
-                    {/* User Info */}
-                    <Paper
-                        variant="outlined"
-                        sx={{
-                            p: 2,
-                            mb: 3,
-                            background: 'grey.50'
-                        }}
-                    >
-                        <Stack spacing={1}>
-                            <Typography variant="subtitle2" sx={{ display: 'flex', alignItems: 'center' }}>
-                                <PersonIcon fontSize="small" sx={{ mr: 1 }} />
-                                <strong>User:</strong> &nbsp;{resetPasswordModal.userName}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
-                                <KeyIcon fontSize="small" sx={{ mr: 1 }} />
-                                Please enter the new password for this user
-                            </Typography>
-                        </Stack>
-                    </Paper>
+                                            <Pagination
+                                                count={totalPages}
+                                                page={currentPage}
+                                                onChange={handlePageChange}
+                                                color="primary"
+                                                showFirstButton
+                                                showLastButton
+                                                siblingCount={1}
+                                                boundaryCount={1}
+                                                sx={{
+                                                    '& .MuiPaginationItem-root': {
+                                                        borderRadius: 2,
+                                                        minWidth: { xs: 28, sm: 32 },
+                                                        height: { xs: 28, sm: 32 },
+                                                        fontFamily: '"Poppins", sans-serif',
+                                                        fontSize: { xs: '0.75rem', sm: '0.875rem' }
+                                                    },
+                                                }}
+                                            />
+                                        </Stack>
+                                    </Box>
+                                )}
+                            </>
+                        )}
+                    </CardContent>
+                </GlassCard>
 
-                    <Box component="form" onSubmit={handleResetPassword}>
-                        <Stack spacing={3}>
-                            {/* New Password Field */}
-                            <StyledTextField
-                                fullWidth
-                                label="New Password"
-                                name="newPassword"
-                                type={passwordVisible.newPassword ? "text" : "password"}
-                                value={resetPasswordModal.newPassword}
-                                onChange={handleResetPasswordInputChange}
-                                required
-                                placeholder="Enter new password"
-                                inputProps={{ minLength: 6 }}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <LockIcon color="action" />
-                                        </InputAdornment>
-                                    ),
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton
-                                                onClick={() => togglePasswordVisibility('newPassword')}
-                                                edge="end"
-                                            >
-                                                {passwordVisible.newPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
-
-                            {/* Confirm Password Field */}
-                            <StyledTextField
-                                fullWidth
-                                label="Confirm New Password"
-                                name="confirmPassword"
-                                type={passwordVisible.confirmPassword ? "text" : "password"}
-                                value={resetPasswordModal.confirmPassword}
-                                onChange={handleResetPasswordInputChange}
-                                required
-                                placeholder="Confirm new password"
-                                inputProps={{ minLength: 6 }}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <CheckCircleIcon color="action" />
-                                        </InputAdornment>
-                                    ),
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton
-                                                onClick={() => togglePasswordVisibility('confirmPassword')}
-                                                edge="end"
-                                            >
-                                                {passwordVisible.confirmPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
-                        </Stack>
-                    </Box>
-                </DialogContent>
-
-                <DialogActions sx={{ p: 3, pt: 0 }}>
-                    <Button onClick={closeResetPasswordModal} size="large">
-                        Cancel
-                    </Button>
-                    <PrimaryButton
-                        onClick={handleResetPassword}
-                        variant="contained"
-                        size="large"
-                        startIcon={<LockResetIcon />}
-                    >
+                {/* Reset Password Modal */}
+                <GlassDialog
+                    open={resetPasswordModal.isOpen}
+                    onClose={closeResetPasswordModal}
+                    maxWidth="sm"
+                    fullWidth
+                >
+                    <DialogTitle sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        borderBottom: '1px solid',
+                        borderColor: alpha(theme.palette.divider, 0.1),
+                        pb: 2,
+                        fontFamily: '"Poppins", sans-serif',
+                        fontWeight: 600
+                    }}>
+                        <LockResetIcon sx={{ mr: 1, color: 'primary.main' }} />
                         Reset Password
-                    </PrimaryButton>
-                </DialogActions>
-            </Dialog>
-        </Box>
+                        <IconButton
+                            aria-label="close"
+                            onClick={closeResetPasswordModal}
+                            sx={{
+                                position: 'absolute',
+                                right: 8,
+                                top: 8,
+                                color: 'text.secondary',
+                            }}
+                        >
+                            <CloseIcon />
+                        </IconButton>
+                    </DialogTitle>
+
+                    <DialogContent sx={{ mt: 3 }}>
+                        {/* User Info */}
+                        <GlassCard sx={{ mb: 3 }}>
+                            <CardContent>
+                                <Stack spacing={1}>
+                                    <Typography variant="subtitle2" sx={{ display: 'flex', alignItems: 'center', fontFamily: '"Poppins", sans-serif' }}>
+                                        <PersonIcon fontSize="small" sx={{ mr: 1 }} />
+                                        <strong>User:</strong> &nbsp;{resetPasswordModal.userName}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', fontFamily: '"Poppins", sans-serif' }}>
+                                        <KeyIcon fontSize="small" sx={{ mr: 1 }} />
+                                        Please enter the new password for this user
+                                    </Typography>
+                                </Stack>
+                            </CardContent>
+                        </GlassCard>
+
+                        <Box component="form" onSubmit={handleResetPassword}>
+                            <Stack spacing={3}>
+                                {/* New Password Field */}
+                                <GlassTextField
+                                    fullWidth
+                                    label="New Password"
+                                    name="newPassword"
+                                    type={passwordVisible.newPassword ? "text" : "password"}
+                                    value={resetPasswordModal.newPassword}
+                                    onChange={handleResetPasswordInputChange}
+                                    required
+                                    placeholder="Enter new password"
+                                    inputProps={{ minLength: 6 }}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <LockIcon color="action" />
+                                            </InputAdornment>
+                                        ),
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <IconButton
+                                                    onClick={() => togglePasswordVisibility('newPassword')}
+                                                    edge="end"
+                                                >
+                                                    {passwordVisible.newPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                />
+
+                                {/* Confirm Password Field */}
+                                <GlassTextField
+                                    fullWidth
+                                    label="Confirm New Password"
+                                    name="confirmPassword"
+                                    type={passwordVisible.confirmPassword ? "text" : "password"}
+                                    value={resetPasswordModal.confirmPassword}
+                                    onChange={handleResetPasswordInputChange}
+                                    required
+                                    placeholder="Confirm new password"
+                                    inputProps={{ minLength: 6 }}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <CheckCircleIcon color="action" />
+                                            </InputAdornment>
+                                        ),
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <IconButton
+                                                    onClick={() => togglePasswordVisibility('confirmPassword')}
+                                                    edge="end"
+                                                >
+                                                    {passwordVisible.confirmPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                />
+                            </Stack>
+                        </Box>
+                    </DialogContent>
+
+                    <DialogActions sx={{ p: 3, pt: 0, borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                        <Button
+                            onClick={closeResetPasswordModal}
+                            size="large"
+                            sx={{
+                                borderRadius: '12px',
+                                textTransform: 'none',
+                                fontFamily: '"Poppins", sans-serif',
+                                fontWeight: 500
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                        <PrimaryButton
+                            onClick={handleResetPassword}
+                            variant="contained"
+                            size="large"
+                            startIcon={<LockResetIcon />}
+                        >
+                            Reset Password
+                        </PrimaryButton>
+                    </DialogActions>
+                </GlassDialog>
+            </Box>
+        </>
     );
 };
 
