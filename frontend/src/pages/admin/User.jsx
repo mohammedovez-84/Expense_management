@@ -148,7 +148,19 @@ const GlassDialog = styled(Dialog)(({ theme }) => ({
         backdropFilter: 'blur(20px)',
         border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
         borderRadius: '24px',
-        boxShadow: `0 20px 60px ${alpha(theme.palette.primary.main, 0.2)}`
+        boxShadow: `0 20px 60px ${alpha(theme.palette.primary.main, 0.2)}`,
+        maxWidth: '90vw',
+        width: '100%',
+        margin: { xs: '16px', sm: '32px' }
+    },
+    '& .MuiDialogContent-root': {
+        padding: { xs: '16px', sm: '24px' }
+    },
+    '& .MuiDialogTitle-root': {
+        padding: { xs: '16px 24px', sm: '20px 24px' }
+    },
+    '& .MuiDialogActions-root': {
+        padding: { xs: '16px', sm: '20px 24px' }
     }
 }));
 
@@ -205,11 +217,13 @@ const PrimaryButton = styled(Button)(({ theme }) => ({
     background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
     color: 'white',
     borderRadius: '12px',
-    padding: '10px 24px',
+    padding: { xs: '8px 16px', sm: '10px 24px' },
     fontFamily: '"Poppins", sans-serif',
     fontWeight: 600,
     textTransform: 'none',
     transition: 'all 0.3s ease',
+    fontSize: { xs: '0.875rem', sm: '1rem' },
+    minHeight: { xs: '36px', sm: '40px' },
     '&:hover': {
         transform: 'translateY(-2px)',
         boxShadow: `0 8px 25px ${alpha(theme.palette.primary.main, 0.4)}`,
@@ -221,6 +235,7 @@ const PrimaryButton = styled(Button)(({ theme }) => ({
 
 const StatCard = React.memo(({ stat, index }) => {
     const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [hovered, setHovered] = useState(false);
 
     return (
@@ -231,7 +246,7 @@ const StatCard = React.memo(({ stat, index }) => {
                 animationDelay: `${index * 0.1}s`,
                 opacity: 0,
                 height: '100%',
-                minHeight: '140px',
+                minHeight: { xs: '120px', sm: '140px' },
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between'
@@ -240,7 +255,7 @@ const StatCard = React.memo(({ stat, index }) => {
             onMouseLeave={() => setHovered(false)}
         >
             <CardContent sx={{
-                p: { xs: 2, sm: 2.5, md: 3 },
+                p: { xs: 1.5, sm: 2.5, md: 3 },
                 flex: 1,
                 display: 'flex',
                 flexDirection: 'column',
@@ -250,7 +265,7 @@ const StatCard = React.memo(({ stat, index }) => {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'flex-start',
-                    mb: 2,
+                    mb: { xs: 1, sm: 2 },
                     gap: 1
                 }}>
                     <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -259,8 +274,8 @@ const StatCard = React.memo(({ stat, index }) => {
                             sx={{
                                 color: 'text.secondary',
                                 fontWeight: 500,
-                                mb: 1,
-                                fontSize: { xs: '0.75rem', sm: '0.813rem', md: '0.875rem' },
+                                mb: { xs: 0.5, sm: 1 },
+                                fontSize: { xs: '0.7rem', sm: '0.813rem', md: '0.875rem' },
                                 letterSpacing: '0.3px',
                                 whiteSpace: 'nowrap',
                                 overflow: 'hidden',
@@ -274,8 +289,13 @@ const StatCard = React.memo(({ stat, index }) => {
                             sx={{
                                 fontWeight: 700,
                                 color: stat.color,
-                                mb: 1,
-                                fontSize: { xs: '1.25rem', sm: '1.5rem', md: '1.75rem', lg: '2rem' },
+                                mb: { xs: 0.5, sm: 1 },
+                                fontSize: { 
+                                    xs: '1rem', 
+                                    sm: '1.25rem', 
+                                    md: '1.5rem',
+                                    lg: '1.75rem' 
+                                },
                                 letterSpacing: '-0.5px',
                                 lineHeight: 1.2,
                                 wordBreak: 'break-all'
@@ -291,7 +311,7 @@ const StatCard = React.memo(({ stat, index }) => {
                                 alignItems: 'center',
                                 gap: 0.5,
                                 fontWeight: 400,
-                                fontSize: { xs: '0.7rem', sm: '0.75rem' }
+                                fontSize: { xs: '0.65rem', sm: '0.75rem' }
                             }}
                         >
                             <Box
@@ -314,9 +334,9 @@ const StatCard = React.memo(({ stat, index }) => {
                     </Box>
 
                     <Box sx={{
-                        width: { xs: 44, sm: 48, md: 52 },
-                        height: { xs: 44, sm: 48, md: 52 },
-                        borderRadius: '14px',
+                        width: { xs: 36, sm: 44, md: 52 },
+                        height: { xs: 36, sm: 44, md: 52 },
+                        borderRadius: { xs: '10px', sm: '14px' },
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -329,7 +349,9 @@ const StatCard = React.memo(({ stat, index }) => {
                         boxShadow: `0 4px 20px ${alpha(stat.color, 0.3)}`,
                         flexShrink: 0,
                     }}>
-                        {React.cloneElement(stat.icon, { sx: { fontSize: { xs: 22, sm: 24, md: 26 } } })}
+                        {React.cloneElement(stat.icon, { 
+                            sx: { fontSize: { xs: 18, sm: 22, md: 26 } } 
+                        })}
                     </Box>
                 </Box>
             </CardContent>
@@ -348,6 +370,7 @@ const UserDashboard = () => {
 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     // State management
     const dispatch = useDispatch();
@@ -571,8 +594,8 @@ const UserDashboard = () => {
                     fontFamily: '"Poppins", "Roboto", "Helvetica", "Arial", sans-serif',
                 },
                 '::-webkit-scrollbar': {
-                    width: '10px',
-                    height: '10px'
+                    width: '8px',
+                    height: '8px'
                 },
                 '::-webkit-scrollbar-track': {
                     background: 'linear-gradient(180deg, #f1f1f1 0%, #e1e1e1 100%)',
@@ -588,26 +611,15 @@ const UserDashboard = () => {
             }} />
 
             <Box sx={{
-                p: { xs: 1.5, sm: 2, md: 3 },
+                p: { xs: 1, sm: 2, md: 3 },
                 minHeight: "100vh",
-                background: `linear-gradient(135deg, ${alpha(theme.palette.background.default, 0.8)} 0%, ${alpha(theme.palette.background.paper, 0.9)} 100%)`,
                 position: 'relative',
                 overflow: 'hidden',
                 fontFamily: '"Poppins", sans-serif',
-                '&::before': {
-                    content: '""',
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: `radial-gradient(circle at 20% 80%, ${alpha(theme.palette.primary.main, 0.05)} 0%, transparent 50%)`,
-                    pointerEvents: 'none'
-                }
             }}>
                 {/* Header Section */}
                 <Box sx={{
-                    mb: 4,
+                    mb: { xs: 3, sm: 4 },
                     animation: `${fadeIn} 0.6s ease forwards`
                 }}>
                     <Box sx={{
@@ -624,7 +636,12 @@ const UserDashboard = () => {
                                 WebkitBackgroundClip: 'text',
                                 WebkitTextFillColor: 'transparent',
                                 mb: 1,
-                                fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' },
+                                fontSize: { 
+                                    xs: '1.25rem', 
+                                    sm: '1.5rem', 
+                                    md: '1.75rem',
+                                    lg: '2.125rem' 
+                                },
                                 letterSpacing: '-0.5px',
                                 lineHeight: 1.2
                             }}>
@@ -634,7 +651,7 @@ const UserDashboard = () => {
                                 color: 'text.secondary',
                                 maxWidth: '600px',
                                 fontWeight: 400,
-                                fontSize: { xs: '0.875rem', sm: '0.95rem' },
+                                fontSize: { xs: '0.8rem', sm: '0.875rem', md: '0.95rem' },
                                 lineHeight: 1.5
                             }}>
                                 Manage users, permissions, and access across your organization
@@ -645,14 +662,14 @@ const UserDashboard = () => {
 
                 {/* Stats Cards */}
                 <Box sx={{
-                    mb: 4,
+                    mb: { xs: 3, sm: 4 },
                     display: 'grid',
                     gridTemplateColumns: {
                         xs: '1fr',
                         sm: 'repeat(2, 1fr)',
                         md: 'repeat(4, 1fr)'
                     },
-                    gap: 3
+                    gap: { xs: 2, sm: 3 }
                 }}>
                     {stats.map((stat, index) => (
                         <Box
@@ -669,22 +686,54 @@ const UserDashboard = () => {
                 </Box>
 
                 {/* Add New User Section */}
-                <GlassCard sx={{ mb: 4 }}>
-                    <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 1 }}>
+                <GlassCard sx={{ mb: { xs: 3, sm: 4 } }}>
+                    <CardContent sx={{ 
+                        p: { xs: 1.5, sm: 2, md: 3 },
+                        '&:last-child': {
+                            pb: { xs: 1.5, sm: 2, md: 3 }
+                        }
+                    }}>
+                        <Box sx={{ 
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            alignItems: 'center', 
+                            mb: { xs: 2, sm: 3 }, 
+                            flexWrap: 'wrap', 
+                            gap: 1 
+                        }}>
                             <Box sx={{ minWidth: 0 }}>
-                                <PoppinsTypography variant="h6" sx={{ fontWeight: 600, mb: 0.5, fontSize: { xs: '1rem', sm: '1.1rem' } }}>
-                                    <AddIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+                                <PoppinsTypography variant="h6" sx={{ 
+                                    fontWeight: 600, 
+                                    mb: 0.5, 
+                                    fontSize: { 
+                                        xs: '0.95rem', 
+                                        sm: '1rem', 
+                                        md: '1.1rem' 
+                                    } 
+                                }}>
+                                    <AddIcon sx={{ 
+                                        mr: 1, 
+                                        verticalAlign: 'middle',
+                                        fontSize: { xs: '1rem', sm: '1.25rem' }
+                                    }} />
                                     Add New User
                                 </PoppinsTypography>
-                                <PoppinsTypography variant="body2" sx={{ color: 'text.secondary', fontWeight: 400, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
+                                <PoppinsTypography variant="body2" sx={{ 
+                                    color: 'text.secondary', 
+                                    fontWeight: 400, 
+                                    fontSize: { 
+                                        xs: '0.75rem', 
+                                        sm: '0.8rem', 
+                                        md: '0.875rem' 
+                                    } 
+                                }}>
                                     Create new user accounts with specific permissions
                                 </PoppinsTypography>
                             </Box>
                         </Box>
 
-                        <Box sx={{ mt: 2 }} component="form" onSubmit={handleAddUser}>
-                            <Grid container spacing={2}>
+                        <Box sx={{ mt: { xs: 1, sm: 2 } }} component="form" onSubmit={handleAddUser}>
+                            <Grid container spacing={{ xs: 1.5, sm: 2 }}>
                                 <Grid item xs={12} md={4}>
                                     <GlassTextField
                                         fullWidth
@@ -698,7 +747,7 @@ const UserDashboard = () => {
                                         InputProps={{
                                             startAdornment: (
                                                 <InputAdornment position="start">
-                                                    <PersonIcon color="action" />
+                                                    <PersonIcon fontSize="small" color="action" />
                                                 </InputAdornment>
                                             ),
                                         }}
@@ -719,7 +768,7 @@ const UserDashboard = () => {
                                         InputProps={{
                                             startAdornment: (
                                                 <InputAdornment position="start">
-                                                    <LockIcon color="action" />
+                                                    <LockIcon fontSize="small" color="action" />
                                                 </InputAdornment>
                                             ),
                                             endAdornment: (
@@ -730,8 +779,8 @@ const UserDashboard = () => {
                                                         size="small"
                                                     >
                                                         {passwordVisible.createPassword ?
-                                                            <VisibilityOffIcon /> :
-                                                            <VisibilityIcon />
+                                                            <VisibilityOffIcon fontSize="small" /> :
+                                                            <VisibilityIcon fontSize="small" />
                                                         }
                                                     </IconButton>
                                                 </InputAdornment>
@@ -741,9 +790,23 @@ const UserDashboard = () => {
                                 </Grid>
                                 <Grid item xs={12} md={3}>
                                     <GlassSelect fullWidth size="small">
-                                        <InputLabel sx={{ fontFamily: '"Poppins", sans-serif' }}>Department</InputLabel>
+                                        <InputLabel sx={{ 
+                                            fontFamily: '"Poppins", sans-serif',
+                                            fontSize: { xs: '0.875rem', sm: '1rem' }
+                                        }}>
+                                            Department
+                                        </InputLabel>
                                         <Select
-                                            MenuProps={{ disableScrollLock: true }}
+                                            MenuProps={{ 
+                                                disableScrollLock: true,
+                                                PaperProps: {
+                                                    sx: {
+                                                        maxHeight: { xs: 200, sm: 300 },
+                                                        borderRadius: '12px',
+                                                        marginTop: '4px'
+                                                    }
+                                                }
+                                            }}
                                             label="Department"
                                             name="department"
                                             value={newUser.department || ''}
@@ -751,15 +814,25 @@ const UserDashboard = () => {
                                             required
                                         >
                                             {departments.map((dept) => (
-                                                <MenuItem key={dept.value} value={dept.value} sx={{ fontFamily: '"Poppins", sans-serif' }}>
+                                                <MenuItem 
+                                                    key={dept.value} 
+                                                    value={dept.value} 
+                                                    sx={{ 
+                                                        fontFamily: '"Poppins", sans-serif',
+                                                        fontSize: { xs: '0.875rem', sm: '1rem' }
+                                                    }}
+                                                >
                                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                                         <Box sx={{
                                                             width: 8,
                                                             height: 8,
                                                             borderRadius: '50%',
-                                                            backgroundColor: dept.color
+                                                            backgroundColor: dept.color,
+                                                            flexShrink: 0
                                                         }} />
-                                                        {dept.label}
+                                                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                            {dept.label}
+                                                        </span>
                                                     </Box>
                                                 </MenuItem>
                                             ))}
@@ -771,10 +844,12 @@ const UserDashboard = () => {
                                         type="submit"
                                         variant="contained"
                                         fullWidth
-                                        size="large"
-                                        sx={{ height: '40px' }}
+                                        sx={{ 
+                                            height: { xs: '36px', sm: '40px' },
+                                            minWidth: 'auto'
+                                        }}
                                     >
-                                        Add
+                                        {isSmallMobile ? 'Add' : 'Add User'}
                                     </PrimaryButton>
                                 </Grid>
                             </Grid>
@@ -784,12 +859,17 @@ const UserDashboard = () => {
 
                 {/* Users List Section */}
                 <GlassCard>
-                    <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                    <CardContent sx={{ 
+                        p: { xs: 1.5, sm: 2, md: 3 },
+                        '&:last-child': {
+                            pb: { xs: 1.5, sm: 2, md: 3 }
+                        }
+                    }}>
                         <Box sx={{
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
-                            mb: 3,
+                            mb: { xs: 2, sm: 3 },
                             flexWrap: 'wrap',
                             gap: 2
                         }}>
@@ -797,14 +877,22 @@ const UserDashboard = () => {
                                 <PoppinsTypography variant="h6" sx={{
                                     fontWeight: 600,
                                     mb: 0.5,
-                                    fontSize: { xs: '1rem', sm: '1.1rem' }
+                                    fontSize: { 
+                                        xs: '0.95rem', 
+                                        sm: '1rem', 
+                                        md: '1.1rem' 
+                                    }
                                 }}>
                                     Users List
                                 </PoppinsTypography>
                                 <PoppinsTypography variant="body2" sx={{
                                     color: 'text.secondary',
                                     fontWeight: 400,
-                                    fontSize: { xs: '0.8rem', sm: '0.875rem' }
+                                    fontSize: { 
+                                        xs: '0.75rem', 
+                                        sm: '0.8rem', 
+                                        md: '0.875rem' 
+                                    }
                                 }}>
                                     Manage and review all user accounts
                                 </PoppinsTypography>
@@ -813,20 +901,26 @@ const UserDashboard = () => {
                             <Box sx={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: 2,
+                                gap: { xs: 1, sm: 2 },
                                 flexWrap: 'wrap',
-                                flexShrink: 0
+                                flexShrink: 0,
+                                width: { xs: '100%', sm: 'auto' }
                             }}>
                                 <GlassTextField
                                     size="small"
                                     placeholder="Search users..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    sx={{ width: { xs: '100%', sm: 200 } }}
+                                    sx={{ 
+                                        width: { xs: '100%', sm: 200 },
+                                        '& .MuiInputBase-root': {
+                                            height: { xs: '36px', sm: '40px' }
+                                        }
+                                    }}
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
-                                                <SearchIcon color="action" />
+                                                <SearchIcon fontSize="small" color="action" />
                                             </InputAdornment>
                                         ),
                                     }}
@@ -836,11 +930,11 @@ const UserDashboard = () => {
 
                         {loading ? (
                             <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-                                <CircularProgress />
+                                <CircularProgress size={isMobile ? 32 : 40} />
                             </Box>
                         ) : filteredUsers?.length === 0 ? (
                             <Box sx={{
-                                height: 300,
+                                height: { xs: 200, sm: 300 },
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -848,8 +942,8 @@ const UserDashboard = () => {
                                 gap: 2
                             }}>
                                 <Box sx={{
-                                    width: 80,
-                                    height: 80,
+                                    width: { xs: 60, sm: 80 },
+                                    height: { xs: 60, sm: 80 },
                                     borderRadius: '50%',
                                     background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`,
                                     display: 'flex',
@@ -857,12 +951,25 @@ const UserDashboard = () => {
                                     justifyContent: 'center',
                                     animation: `${floatAnimation} 3s ease-in-out infinite`
                                 }}>
-                                    <SearchIcon sx={{ fontSize: 40, color: alpha(theme.palette.primary.main, 0.5) }} />
+                                    <SearchIcon sx={{ 
+                                        fontSize: { xs: 28, sm: 40 }, 
+                                        color: alpha(theme.palette.primary.main, 0.5) 
+                                    }} />
                                 </Box>
-                                <PoppinsTypography variant="h6" color="text.secondary" align="center">
+                                <PoppinsTypography 
+                                    variant="h6" 
+                                    color="text.secondary" 
+                                    align="center"
+                                    sx={{ fontSize: { xs: '0.95rem', sm: '1.25rem' } }}
+                                >
                                     No users found
                                 </PoppinsTypography>
-                                <PoppinsTypography variant="body2" color="text.secondary" align="center">
+                                <PoppinsTypography 
+                                    variant="body2" 
+                                    color="text.secondary" 
+                                    align="center"
+                                    sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                                >
                                     Try adjusting your search criteria
                                 </PoppinsTypography>
                             </Box>
@@ -871,7 +978,7 @@ const UserDashboard = () => {
                             <Stack spacing={2}>
                                 {currentUsers?.map((user) => (
                                     <GlassCard key={user?._id}>
-                                        <CardContent>
+                                        <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
                                             <Stack spacing={2}>
                                                 {/* User Info */}
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -879,16 +986,22 @@ const UserDashboard = () => {
                                                         sx={{
                                                             bgcolor: alpha(getDepartmentColor(user?.department), 0.1),
                                                             color: getDepartmentColor(user?.department),
-                                                            width: 48,
-                                                            height: 48,
+                                                            width: { xs: 40, sm: 48 },
+                                                            height: { xs: 40, sm: 48 },
                                                             fontWeight: 600,
                                                             fontFamily: '"Poppins", sans-serif',
+                                                            fontSize: { xs: '0.875rem', sm: '1rem' }
                                                         }}
                                                     >
                                                         {user?.name?.charAt(0).toUpperCase()}
                                                     </Avatar>
                                                     <Box sx={{ flex: 1, minWidth: 0 }}>
-                                                        <PoppinsTypography variant="subtitle1" fontWeight="600" noWrap>
+                                                        <PoppinsTypography 
+                                                            variant="subtitle1" 
+                                                            fontWeight="600" 
+                                                            noWrap
+                                                            sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
+                                                        >
                                                             {user?.name}
                                                         </PoppinsTypography>
                                                         <PoppinsTypography
@@ -898,12 +1011,17 @@ const UserDashboard = () => {
                                                                 display: 'flex',
                                                                 alignItems: 'center',
                                                                 mt: 0.5,
-                                                                minWidth: 0
+                                                                minWidth: 0,
+                                                                fontSize: { xs: '0.75rem', sm: '0.875rem' }
                                                             }}
                                                             noWrap
                                                         >
                                                             <EmailIcon fontSize="small" sx={{ mr: 0.5, flexShrink: 0 }} />
-                                                            <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                            <Box component="span" sx={{ 
+                                                                overflow: 'hidden', 
+                                                                textOverflow: 'ellipsis', 
+                                                                whiteSpace: 'nowrap' 
+                                                            }}>
                                                                 {user?.email}
                                                             </Box>
                                                         </PoppinsTypography>
@@ -911,28 +1029,40 @@ const UserDashboard = () => {
                                                 </Box>
 
                                                 {/* Department & Status */}
-                                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <Box sx={{ 
+                                                    display: 'flex', 
+                                                    justifyContent: 'space-between', 
+                                                    alignItems: 'center',
+                                                    flexWrap: 'wrap',
+                                                    gap: 1
+                                                }}>
                                                     <Chip
-                                                        icon={<BusinessIcon />}
+                                                        icon={<BusinessIcon fontSize="small" />}
                                                         label={user?.department}
                                                         size="small"
                                                         sx={{
                                                             background: alpha(getDepartmentColor(user?.department), 0.1),
                                                             color: getDepartmentColor(user?.department),
-                                                            border: `1px solid ${alpha(getDepartmentColor(user?.department), 0.2)}`
+                                                            border: `1px solid ${alpha(getDepartmentColor(user?.department), 0.2)}`,
+                                                            fontSize: { xs: '0.7rem', sm: '0.875rem' }
                                                         }}
                                                     />
                                                     <Chip
-                                                        icon={<CheckCircleIcon />}
+                                                        icon={<CheckCircleIcon fontSize="small" />}
                                                         label={user?.isAdmin ? "Admin" : "User"}
                                                         color={user?.isAdmin ? "success" : "default"}
                                                         size="small"
                                                         variant="outlined"
+                                                        sx={{ fontSize: { xs: '0.7rem', sm: '0.875rem' } }}
                                                     />
                                                 </Box>
 
                                                 {/* Last Login */}
-                                                <Typography variant="body2" color="text.secondary">
+                                                <Typography 
+                                                    variant="body2" 
+                                                    color="text.secondary"
+                                                    sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                                                >
                                                     <strong>Last Login:</strong> {formatLastLogin(user)}
                                                 </Typography>
 
@@ -942,10 +1072,11 @@ const UserDashboard = () => {
                                                     variant="outlined"
                                                     startIcon={<LockResetIcon />}
                                                     onClick={() => openResetPasswordModal(user?._id, user?.name)}
-                                                    size="small"
+                                                    size={isSmallMobile ? "small" : "medium"}
                                                     sx={{
                                                         borderRadius: '8px',
                                                         borderColor: alpha(theme.palette.primary.main, 0.2),
+                                                        fontSize: { xs: '0.75rem', sm: '0.875rem' },
                                                         '&:hover': {
                                                             borderColor: theme.palette.primary.main,
                                                             background: alpha(theme.palette.primary.main, 0.04)
@@ -969,8 +1100,8 @@ const UserDashboard = () => {
                                         borderRadius: '12px',
                                         border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
                                         '& .MuiTableCell-root': {
-                                            py: 2,
-                                            px: { xs: 1, sm: 2 },
+                                            py: { xs: 1, sm: 1.5, md: 2 },
+                                            px: { xs: 1, sm: 1.5, md: 2 },
                                             borderColor: alpha(theme.palette.divider, 0.1)
                                         }
                                     }}
@@ -982,8 +1113,9 @@ const UserDashboard = () => {
                                                 '& th': {
                                                     fontWeight: 600,
                                                     fontFamily: '"Poppins", sans-serif',
-                                                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                                                    color: theme.palette.text.primary
+                                                    fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' },
+                                                    color: theme.palette.text.primary,
+                                                    whiteSpace: 'nowrap'
                                                 }
                                             }}>
                                                 <TableCell>User</TableCell>
@@ -1006,21 +1138,27 @@ const UserDashboard = () => {
                                                     }}
                                                 >
                                                     <TableCell>
-                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
                                                             <Avatar
                                                                 sx={{
                                                                     bgcolor: alpha(getDepartmentColor(user?.department), 0.1),
                                                                     color: getDepartmentColor(user?.department),
-                                                                    width: 40,
-                                                                    height: 40,
+                                                                    width: { xs: 32, sm: 36, md: 40 },
+                                                                    height: { xs: 32, sm: 36, md: 40 },
                                                                     fontWeight: 600,
                                                                     fontFamily: '"Poppins", sans-serif',
+                                                                    fontSize: { xs: '0.75rem', sm: '0.875rem' }
                                                                 }}
                                                             >
                                                                 {user?.name?.charAt(0).toUpperCase()}
                                                             </Avatar>
                                                             <Box sx={{ minWidth: 0 }}>
-                                                                <PoppinsTypography variant="subtitle2" fontWeight="600" noWrap>
+                                                                <PoppinsTypography 
+                                                                    variant="subtitle2" 
+                                                                    fontWeight="600" 
+                                                                    noWrap
+                                                                    sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                                                                >
                                                                     {user?.name}
                                                                 </PoppinsTypography>
                                                                 <PoppinsTypography
@@ -1029,7 +1167,8 @@ const UserDashboard = () => {
                                                                     sx={{
                                                                         display: 'flex',
                                                                         alignItems: 'center',
-                                                                        fontWeight: 500
+                                                                        fontWeight: 500,
+                                                                        fontSize: { xs: '0.7rem', sm: '0.75rem' }
                                                                     }}
                                                                     noWrap
                                                                 >
@@ -1041,7 +1180,7 @@ const UserDashboard = () => {
                                                     </TableCell>
                                                     <TableCell>
                                                         <Chip
-                                                            icon={<BusinessIcon />}
+                                                            icon={<BusinessIcon fontSize="small" />}
                                                             label={user?.department}
                                                             size="small"
                                                             sx={{
@@ -1049,23 +1188,35 @@ const UserDashboard = () => {
                                                                 color: getDepartmentColor(user?.department),
                                                                 border: `1px solid ${alpha(getDepartmentColor(user?.department), 0.2)}`,
                                                                 fontFamily: '"Poppins", sans-serif',
-                                                                fontWeight: 500
+                                                                fontWeight: 500,
+                                                                fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.875rem' }
                                                             }}
                                                         />
                                                     </TableCell>
                                                     <TableCell>
-                                                        <PoppinsTypography variant="body2" sx={{ fontWeight: 400, color: 'text.secondary' }}>
+                                                        <PoppinsTypography 
+                                                            variant="body2" 
+                                                            sx={{ 
+                                                                fontWeight: 400, 
+                                                                color: 'text.secondary',
+                                                                fontSize: { xs: '0.75rem', sm: '0.875rem' }
+                                                            }}
+                                                        >
                                                             {formatLastLogin(user)}
                                                         </PoppinsTypography>
                                                     </TableCell>
                                                     <TableCell>
                                                         <Chip
-                                                            icon={<CheckCircleIcon />}
+                                                            icon={<CheckCircleIcon fontSize="small" />}
                                                             label={user?.isAdmin ? "Administrator" : "Standard User"}
                                                             color={user?.isAdmin ? "success" : "default"}
                                                             size="small"
                                                             variant="outlined"
-                                                            sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 500 }}
+                                                            sx={{ 
+                                                                fontFamily: '"Poppins", sans-serif', 
+                                                                fontWeight: 500,
+                                                                fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.875rem' }
+                                                            }}
                                                         />
                                                     </TableCell>
                                                     <TableCell align="center">
@@ -1077,8 +1228,8 @@ const UserDashboard = () => {
                                                                     color: theme.palette.primary.main,
                                                                     border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
                                                                     borderRadius: 2,
-                                                                    width: 40,
-                                                                    height: 40,
+                                                                    width: { xs: 32, sm: 36, md: 40 },
+                                                                    height: { xs: 32, sm: 36, md: 40 },
                                                                     '&:hover': {
                                                                         backgroundColor: theme.palette.primary.main,
                                                                         color: 'white',
@@ -1088,7 +1239,7 @@ const UserDashboard = () => {
                                                                     animation: `${pulseAnimation} 2s infinite`
                                                                 }}
                                                             >
-                                                                <LockResetIcon sx={{ fontSize: 20 }} />
+                                                                <LockResetIcon sx={{ fontSize: { xs: 16, sm: 18, md: 20 } }} />
                                                             </IconButton>
                                                         </Tooltip>
                                                     </TableCell>
@@ -1102,8 +1253,8 @@ const UserDashboard = () => {
                                 {totalPages > 1 && (
                                     <Box
                                         sx={{
-                                            mt: 3,
-                                            pt: 3,
+                                            mt: { xs: 2, sm: 3 },
+                                            pt: { xs: 2, sm: 3 },
                                             borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
                                             width: '100%',
                                         }}
@@ -1112,12 +1263,16 @@ const UserDashboard = () => {
                                             direction={{ xs: 'column', sm: 'row' }}
                                             justifyContent="space-between"
                                             alignItems={{ xs: 'flex-start', sm: 'center' }}
-                                            spacing={2}
+                                            spacing={{ xs: 1, sm: 2 }}
                                         >
-                                            <PoppinsTypography variant="body2" color="text.secondary" sx={{
-                                                fontWeight: 400,
-                                                fontSize: { xs: '0.75rem', sm: '0.875rem' }
-                                            }}>
+                                            <PoppinsTypography 
+                                                variant="body2" 
+                                                color="text.secondary" 
+                                                sx={{
+                                                    fontWeight: 400,
+                                                    fontSize: { xs: '0.75rem', sm: '0.875rem' }
+                                                }}
+                                            >
                                                 Showing {indexOfFirstUser + 1}–{Math.min(indexOfLastUser, filteredUsers.length)} of {filteredUsers.length} users
                                             </PoppinsTypography>
 
@@ -1126,17 +1281,18 @@ const UserDashboard = () => {
                                                 page={currentPage}
                                                 onChange={handlePageChange}
                                                 color="primary"
-                                                showFirstButton
-                                                showLastButton
-                                                siblingCount={1}
-                                                boundaryCount={1}
+                                                showFirstButton={!isSmallMobile}
+                                                showLastButton={!isSmallMobile}
+                                                siblingCount={isSmallMobile ? 0 : 1}
+                                                boundaryCount={isSmallMobile ? 1 : 1}
                                                 sx={{
                                                     '& .MuiPaginationItem-root': {
                                                         borderRadius: 2,
-                                                        minWidth: { xs: 28, sm: 32 },
-                                                        height: { xs: 28, sm: 32 },
+                                                        minWidth: { xs: 24, sm: 32 },
+                                                        height: { xs: 24, sm: 32 },
                                                         fontFamily: '"Poppins", sans-serif',
-                                                        fontSize: { xs: '0.75rem', sm: '0.875rem' }
+                                                        fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                                                        margin: { xs: '0 2px', sm: '0 4px' }
                                                     },
                                                 }}
                                             />
@@ -1162,34 +1318,63 @@ const UserDashboard = () => {
                         borderColor: alpha(theme.palette.divider, 0.1),
                         pb: 2,
                         fontFamily: '"Poppins", sans-serif',
-                        fontWeight: 600
+                        fontWeight: 600,
+                        fontSize: { xs: '1rem', sm: '1.25rem' }
                     }}>
-                        <LockResetIcon sx={{ mr: 1, color: 'primary.main' }} />
+                        <LockResetIcon sx={{ 
+                            mr: 1, 
+                            color: 'primary.main',
+                            fontSize: { xs: '1rem', sm: '1.25rem' }
+                        }} />
                         Reset Password
                         <IconButton
                             aria-label="close"
                             onClick={closeResetPasswordModal}
                             sx={{
                                 position: 'absolute',
-                                right: 8,
-                                top: 8,
+                                right: { xs: 8, sm: 12 },
+                                top: { xs: 8, sm: 12 },
                                 color: 'text.secondary',
+                                padding: { xs: '4px', sm: '8px' }
                             }}
+                            size="small"
                         >
-                            <CloseIcon />
+                            <CloseIcon fontSize={isSmallMobile ? "small" : "medium"} />
                         </IconButton>
                     </DialogTitle>
 
-                    <DialogContent sx={{ mt: 3 }}>
+                    <DialogContent sx={{ 
+                        mt: { xs: 2, sm: 3 },
+                        '&.MuiDialogContent-root': {
+                            overflowY: 'visible'
+                        }
+                    }}>
                         {/* User Info */}
                         <GlassCard sx={{ mb: 3 }}>
-                            <CardContent>
+                            <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
                                 <Stack spacing={1}>
-                                    <Typography variant="subtitle2" sx={{ display: 'flex', alignItems: 'center', fontFamily: '"Poppins", sans-serif' }}>
+                                    <Typography 
+                                        variant="subtitle2" 
+                                        sx={{ 
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            fontFamily: '"Poppins", sans-serif',
+                                            fontSize: { xs: '0.875rem', sm: '1rem' }
+                                        }}
+                                    >
                                         <PersonIcon fontSize="small" sx={{ mr: 1 }} />
                                         <strong>User:</strong> &nbsp;{resetPasswordModal.userName}
                                     </Typography>
-                                    <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', fontFamily: '"Poppins", sans-serif' }}>
+                                    <Typography 
+                                        variant="body2" 
+                                        color="text.secondary" 
+                                        sx={{ 
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            fontFamily: '"Poppins", sans-serif',
+                                            fontSize: { xs: '0.75rem', sm: '0.875rem' }
+                                        }}
+                                    >
                                         <KeyIcon fontSize="small" sx={{ mr: 1 }} />
                                         Please enter the new password for this user
                                     </Typography>
@@ -1198,7 +1383,7 @@ const UserDashboard = () => {
                         </GlassCard>
 
                         <Box component="form" onSubmit={handleResetPassword}>
-                            <Stack spacing={3}>
+                            <Stack spacing={{ xs: 2, sm: 3 }}>
                                 {/* New Password Field */}
                                 <GlassTextField
                                     fullWidth
@@ -1210,10 +1395,11 @@ const UserDashboard = () => {
                                     required
                                     placeholder="Enter new password"
                                     inputProps={{ minLength: 6 }}
+                                    size={isSmallMobile ? "small" : "medium"}
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
-                                                <LockIcon color="action" />
+                                                <LockIcon fontSize={isSmallMobile ? "small" : "medium"} color="action" />
                                             </InputAdornment>
                                         ),
                                         endAdornment: (
@@ -1221,8 +1407,12 @@ const UserDashboard = () => {
                                                 <IconButton
                                                     onClick={() => togglePasswordVisibility('newPassword')}
                                                     edge="end"
+                                                    size={isSmallMobile ? "small" : "medium"}
                                                 >
-                                                    {passwordVisible.newPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                                                    {passwordVisible.newPassword ? 
+                                                        <VisibilityOffIcon fontSize={isSmallMobile ? "small" : "medium"} /> : 
+                                                        <VisibilityIcon fontSize={isSmallMobile ? "small" : "medium"} />
+                                                    }
                                                 </IconButton>
                                             </InputAdornment>
                                         ),
@@ -1240,10 +1430,11 @@ const UserDashboard = () => {
                                     required
                                     placeholder="Confirm new password"
                                     inputProps={{ minLength: 6 }}
+                                    size={isSmallMobile ? "small" : "medium"}
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
-                                                <CheckCircleIcon color="action" />
+                                                <CheckCircleIcon fontSize={isSmallMobile ? "small" : "medium"} color="action" />
                                             </InputAdornment>
                                         ),
                                         endAdornment: (
@@ -1251,8 +1442,12 @@ const UserDashboard = () => {
                                                 <IconButton
                                                     onClick={() => togglePasswordVisibility('confirmPassword')}
                                                     edge="end"
+                                                    size={isSmallMobile ? "small" : "medium"}
                                                 >
-                                                    {passwordVisible.confirmPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                                                    {passwordVisible.confirmPassword ? 
+                                                        <VisibilityOffIcon fontSize={isSmallMobile ? "small" : "medium"} /> : 
+                                                        <VisibilityIcon fontSize={isSmallMobile ? "small" : "medium"} />
+                                                    }
                                                 </IconButton>
                                             </InputAdornment>
                                         ),
@@ -1262,15 +1457,20 @@ const UserDashboard = () => {
                         </Box>
                     </DialogContent>
 
-                    <DialogActions sx={{ p: 3, pt: 0, borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+                    <DialogActions sx={{ 
+                        p: { xs: 2, sm: 3 }, 
+                        pt: 0, 
+                        borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}` 
+                    }}>
                         <Button
                             onClick={closeResetPasswordModal}
-                            size="large"
+                            size={isSmallMobile ? "small" : "large"}
                             sx={{
                                 borderRadius: '12px',
                                 textTransform: 'none',
                                 fontFamily: '"Poppins", sans-serif',
-                                fontWeight: 500
+                                fontWeight: 500,
+                                fontSize: { xs: '0.75rem', sm: '0.875rem' }
                             }}
                         >
                             Cancel
@@ -1278,8 +1478,11 @@ const UserDashboard = () => {
                         <PrimaryButton
                             onClick={handleResetPassword}
                             variant="contained"
-                            size="large"
+                            size={isSmallMobile ? "small" : "large"}
                             startIcon={<LockResetIcon />}
+                            sx={{
+                                fontSize: { xs: '0.75rem', sm: '0.875rem' }
+                            }}
                         >
                             Reset Password
                         </PrimaryButton>

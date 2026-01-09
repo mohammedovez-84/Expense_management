@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
     AppBar,
     Toolbar,
-    Typography,
     IconButton,
     Menu,
     MenuItem,
@@ -23,14 +22,9 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUser, logout } from "../store/authSlice";
 import { useLocation } from "../contexts/LocationContext";
-import { StyledSelect } from "../styles/budgeting.styles";
-
-
 
 const Navbar = ({
     onMenuClick,
-    darkMode,
-    onDarkModeToggle,
 }) => {
     const { user } = useSelector((state) => state.auth)
     const { csrf } = useSelector((state) => state?.auth)
@@ -40,9 +34,6 @@ const Navbar = ({
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     const { currentLoc, setCurrentLoc } = useLocation()
-
-    // console.log("user in nav: ", user);
-    // console.log("currentLoc in nav: ", currentLoc);
 
     React.useEffect(() => {
         dispatch(fetchUser())
@@ -56,15 +47,8 @@ const Navbar = ({
         setAnchorEl(null);
     };
 
-
-
-
     const handleLogoutClick = async () => {
         await dispatch(logout(csrf))
-    };
-
-    const handleDarkModeToggle = () => {
-        if (onDarkModeToggle) onDarkModeToggle();
     };
 
     // Enhanced locations array
@@ -89,14 +73,12 @@ const Navbar = ({
     // Handle location change for desktop dropdown
     const handleDesktopLocationChange = (event) => {
         const newLocation = event.target.value;
-        console.log('Desktop location change to:', newLocation);
         setCurrentLoc(newLocation);
     };
 
     // Handle location change for mobile dropdown
     const handleMobileLocationChange = (event) => {
         const newLocation = event.target.value;
-        console.log('Mobile location change to:', newLocation);
         setCurrentLoc(newLocation);
     };
 
@@ -105,23 +87,24 @@ const Navbar = ({
     return (
         <AppBar
             position="sticky"
-            elevation={1}
+            elevation={0}
             sx={{
                 bgcolor: 'background.paper',
                 color: 'text.primary',
                 borderBottom: '1px solid',
                 borderColor: 'divider',
-                transition: 'all 0.3s ease',
-                // zIndex: (theme) => theme.zIndex.drawer + 1000
+                zIndex: (theme) => theme.zIndex.drawer + 100,
+                height: '64px'
             }}
         >
             <Toolbar sx={{
-                minHeight: { xs: 56, sm: 64 },
-                px: { xs: 1, sm: 2 },
-                py: { xs: 0.5, sm: 1 },
-                transition: 'all 0.3s ease',
+                minHeight: '64px',
+                px: 2,
+                display: 'flex',
+                justifyContent: 'flex-end',
+                alignItems: 'center',
             }}>
-                {/* Enhanced Hamburger Menu */}
+                {/* Hamburger Menu for Mobile */}
                 <IconButton
                     color="inherit"
                     aria-label="open drawer"
@@ -130,72 +113,31 @@ const Navbar = ({
                     sx={{
                         mr: 2,
                         display: { md: 'none' },
-                        p: { xs: 0.5, sm: 1 },
-                        transition: 'all 0.3s ease',
-                        '&:hover': {
-                            backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                            transform: 'scale(1.1)',
-                        }
                     }}
                 >
-                    <MenuIcon fontSize={isMobile ? "small" : "medium"} />
+                    <MenuIcon />
                 </IconButton>
 
-                {/* Enhanced App Title */}
-                {/* {isMobile && (
-                    <Typography
-                        variant="h6"
-                        component="div"
-                        sx={{
-                            flexGrow: 1,
-                            fontSize: isSmallMobile ? '1rem' : '1.1rem',
-                            fontWeight: 600,
-                            transition: 'all 0.3s ease',
-                        }}
-                    >
-                        ExpenseTracker
-                    </Typography>
-                )} */}
-
-                {/* Enhanced Right side icons */}
+                {/* Right side controls */}
                 <Box sx={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: { xs: 0.5, sm: 1 },
+                    gap: 2,
                     ml: 'auto',
-                    transition: 'all 0.3s ease',
                 }}>
-                    {/* Enhanced Company State Dropdown for Desktop */}
+                    {/* Company State Dropdown for Desktop */}
                     {!isMobile && user?.role === "superadmin" && (
-                        <FormControl
-                            size="small"
-                            sx={{
-                                minWidth: 140,
-                                mr: 1,
-                                transition: 'all 0.3s ease',
-                                '@media (max-width: 1024px)': {
-                                    minWidth: 120,
-                                }
-                            }}
-                        >
-                            <StyledSelect
+                        <FormControl size="small" sx={{ minWidth: 140, mr: 1 }}>
+                            <Select
                                 value={currentLoc || "OVERALL"}
                                 onChange={handleDesktopLocationChange}
                                 displayEmpty
-                                MenuProps={{ disableScrollLock: true }}
-                                inputProps={{ 'aria-label': 'Select company location' }}
                                 sx={{
-                                    fontSize: '0.875rem',
-                                    height: 40,
-                                    transition: 'all 0.3s ease',
+                                    height: 36,
                                     '& .MuiSelect-select': {
                                         display: 'flex',
                                         alignItems: 'center',
-                                        py: 1,
                                     },
-                                    '&:hover': {
-                                        backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                                    }
                                 }}
                                 renderValue={(selected) => {
                                     const location = locations.find(loc => loc.value === selected);
@@ -204,20 +146,13 @@ const Navbar = ({
                                             <BusinessIcon
                                                 sx={{
                                                     mr: 1,
-                                                    fontSize: 18,
+                                                    fontSize: 16,
                                                     color: location?.color || "#28be5dff"
                                                 }}
                                             />
-                                            <Typography
-                                                variant="body2"
-                                                sx={{
-                                                    textTransform: 'capitalize',
-                                                    fontSize: '0.875rem',
-                                                    fontWeight: 'medium'
-                                                }}
-                                            >
+                                            <Box component="span" sx={{ fontSize: '0.875rem' }}>
                                                 {location?.name || "Overall"}
-                                            </Typography>
+                                            </Box>
                                         </Box>
                                     );
                                 }}
@@ -228,114 +163,84 @@ const Navbar = ({
                                             <BusinessIcon
                                                 sx={{
                                                     mr: 1.5,
-                                                    fontSize: 18,
+                                                    fontSize: 16,
                                                     color: location.color
                                                 }}
                                             />
-                                            <Typography variant="body2">{location.name}</Typography>
+                                            <Box component="span" sx={{ fontSize: '0.875rem' }}>
+                                                {location.name}
+                                            </Box>
                                         </Box>
                                     </MenuItem>
                                 ))}
-                            </StyledSelect>
+                            </Select>
                         </FormControl>
                     )}
 
-
-
-                    {/* Enhanced Three dots menu */}
+                    {/* Three dots menu */}
                     <IconButton
-                        size={isMobile ? "small" : "medium"}
                         edge="end"
                         aria-label="show more"
                         aria-controls={menuId}
                         aria-haspopup="true"
                         onClick={handleProfileMenuOpen}
                         color="inherit"
-                        sx={{
-                            p: { xs: 0.5, sm: 1 },
-                            transition: 'all 0.3s ease',
-                            '&:hover': {
-                                backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                                transform: 'scale(1.1)',
-                            }
-                        }}
+                        sx={{ p: 0.5 }}
                     >
-                        <MoreVertIcon fontSize={isMobile ? "small" : "medium"} />
+                        <MoreVertIcon />
                     </IconButton>
                 </Box>
 
-                {/* Enhanced Profile Menu */}
-                {/* Enhanced Profile Menu */}
+                {/* Profile Menu */}
                 <Menu
-                    disableScrollLock
                     anchorEl={anchorEl}
                     anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'right',
+                    }}
+                    transformOrigin={{
                         vertical: 'top',
                         horizontal: 'right',
                     }}
                     id={menuId}
                     keepMounted
-                    transformOrigin={{
-                        vertical: 'top',
-                        horizontal: 'right',
-                    }}
                     open={Boolean(anchorEl)}
                     onClose={handleMenuClose}
                     PaperProps={{
                         sx: {
-                            mt: 4.5,
-                            minWidth: isMobile ? 200 : 240,
-                            borderRadius: 2,
-                            boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-                            transition: 'all 0.3s ease',
-                            zIndex: (theme) => theme.zIndex.drawer + 2000,
-                            '@media (max-width: 480px)': {
-                                minWidth: '95vw',
-                                maxWidth: '95vw',
-                                mx: 1,
-                            }
+                            mt: 1.5,
+                            minWidth: 200,
+                            borderRadius: 1,
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
                         }
                     }}
                 >
-                    {/* Enhanced Location Selector for Mobile */}
+                    {/* Location Selector for Mobile */}
                     {isMobile && user?.role === "superadmin" && (
-                        <Box sx={{
-                            px: 2,
-                            py: 1,
-                            borderBottom: 1,
-                            borderColor: 'divider',
-                            transition: 'all 0.3s ease',
-                        }}>
-                            <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1 }}>
+                        <Box sx={{ px: 2, py: 1, borderBottom: 1, borderColor: 'divider' }}>
+                            <Box component="span" sx={{ fontSize: '0.875rem', fontWeight: 500, mb: 1, display: 'block' }}>
                                 Select Location
-                            </Typography>
+                            </Box>
                             <FormControl fullWidth size="small">
                                 <Select
                                     value={currentLoc || "OVERALL"}
                                     onChange={handleMobileLocationChange}
                                     displayEmpty
                                     sx={{ fontSize: '0.875rem' }}
-                                    MenuProps={{
-                                        disableScrollLock: true,
-                                        sx: {
-                                            zIndex: (theme) => theme.zIndex.drawer + 3000,
-                                        }
-                                    }}
                                 >
                                     {locations.map((location) => (
-                                        <MenuItem
-                                            key={location.id}
-                                            value={location.value}
-                                        >
-                                            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                        <MenuItem key={location.id} value={location.value}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                                 <BusinessIcon
                                                     sx={{
                                                         mr: 1.5,
-                                                        fontSize: 18,
+                                                        fontSize: 16,
                                                         color: location.color
                                                     }}
                                                 />
-                                                <Typography variant="body2">{location.name}</Typography>
+                                                <Box component="span" sx={{ fontSize: '0.875rem' }}>
+                                                    {location.name}
+                                                </Box>
                                             </Box>
                                         </MenuItem>
                                     ))}
@@ -344,57 +249,37 @@ const Navbar = ({
                         </Box>
                     )}
 
-                    {/* Current Location Display for Super Admin */}
+                    {/* Current Location Display */}
                     {user?.role === "superadmin" && (
-                        <Box sx={{
-                            px: 2,
-                            py: 1,
-                            borderBottom: 1,
-                            borderColor: 'divider',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            transition: 'all 0.3s ease',
-                        }}>
+                        <Box sx={{ px: 2, py: 1, borderBottom: 1, borderColor: 'divider' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                 <BusinessIcon
                                     sx={{
                                         mr: 1.5,
-                                        fontSize: 18,
+                                        fontSize: 16,
                                         color: getLocationColor(currentLoc)
                                     }}
                                 />
                                 <Box>
-                                    <Typography variant="subtitle2" fontWeight="bold">
+                                    <Box component="span" sx={{ fontSize: '0.875rem', fontWeight: 500, display: 'block' }}>
                                         Current Location
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
+                                    </Box>
+                                    <Box component="span" sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
                                         {getLocationName(currentLoc)}
-                                    </Typography>
+                                    </Box>
                                 </Box>
                             </Box>
                         </Box>
                     )}
 
-                    {/* 🧑‍💼 User Info Section */}
-                    <Box
-                        sx={{
-                            px: 2,
-                            py: 1.5,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 1.5,
-                            borderBottom: 1,
-                            borderColor: 'divider',
-                            transition: 'all 0.3s ease',
-                        }}
-                    >
+                    {/* User Info */}
+                    <Box sx={{ px: 2, py: 1.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
                         <Avatar
                             sx={{
                                 bgcolor: 'primary.main',
                                 width: 36,
                                 height: 36,
-                                fontSize: '1rem',
+                                fontSize: '0.875rem',
                                 fontWeight: 600,
                             }}
                             src={user?.avatarUrl || ''}
@@ -404,33 +289,23 @@ const Navbar = ({
                                 : 'U'}
                         </Avatar>
                         <Box>
-                            <Typography variant="subtitle2" fontWeight="bold">
+                            <Box component="span" sx={{ fontSize: '0.875rem', fontWeight: 500, display: 'block' }}>
                                 {user?.name || 'User'}
-                            </Typography>
-                            <Typography
-                                variant="body2"
-                                color="text.secondary"
-                                sx={{ textTransform: 'capitalize' }}
-                            >
+                            </Box>
+                            <Box component="span" sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
                                 {user?.role || 'Member'}
-                            </Typography>
+                            </Box>
                         </Box>
                     </Box>
 
-                    {/* Profile and Logout Options */}
-                    <MenuItem onClick={handleLogoutClick} sx={{ transition: 'all 0.3s ease' }}>
-                        <LogoutIcon
-                            sx={{
-                                mr: 2,
-                                fontSize: isMobile ? 18 : 20
-                            }}
-                        />
-                        <Typography variant="body2">Logout</Typography>
+                    {/* Logout Option */}
+                    <MenuItem onClick={handleLogoutClick} sx={{ fontSize: '0.875rem' }}>
+                        <LogoutIcon sx={{ mr: 2, fontSize: 18 }} />
+                        Logout
                     </MenuItem>
                 </Menu>
-
             </Toolbar>
-        </AppBar >
+        </AppBar>
     );
 };
 

@@ -809,24 +809,19 @@ const ReimbursementManagement = () => {
         },
       }} />
       
-      <Container maxWidth="xl" sx={{ 
-        p: { xs: 1.5, sm: 2, md: 3 }, 
-        minHeight: "100vh",
-        background: `linear-gradient(135deg, ${alpha(theme.palette.background.default, 0.8)} 0%, ${alpha(theme.palette.background.paper, 0.9)} 100%)`,
-        position: 'relative',
-        overflow: 'hidden',
-        fontFamily: '"Poppins", sans-serif',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: `radial-gradient(circle at 20% 80%, ${alpha(theme.palette.primary.main, 0.05)} 0%, transparent 50%)`,
-          pointerEvents: 'none'
-        }
-      }}>
+<Container
+  maxWidth="xl"
+  disableGutters
+  sx={{
+    background: "transparent !important",
+    boxShadow: "none",
+    p: { xs: 1.5, sm: 2, md: 3 },
+    minHeight: "100vh",
+    position: "relative",
+    overflow: "hidden",
+  }}
+>
+
         {/* Notifications */}
         <Snackbar
           open={!!errorMessage}

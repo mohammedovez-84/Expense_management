@@ -9,7 +9,8 @@ import {
     Divider,
     useTheme,
     useMediaQuery,
-    Chip,
+    Avatar,
+    LinearProgress,
 } from "@mui/material";
 
 import {
@@ -32,42 +33,95 @@ const AdminSidebar = ({
     open,
     onClose,
 }) => {
-    const dispatch = useDispatch()
-    const { csrf, loading: logoutLoader } = useSelector((state) => state?.auth)
+    const dispatch = useDispatch();
+    const { csrf, loading: logoutLoader, user } = useSelector((state) => state?.auth || {});
     const navigate = useNavigate();
     const location = useLocation();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-    const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [activeItem, setActiveItem] = useState("");
     const [hoveredItem, setHoveredItem] = useState(null);
+    const [loadingItems, setLoadingItems] = useState({});
 
-    // Menu items with their respective icons and paths
+    // Menu items with Material UI icons
     const menuItems = [
-        { text: "Dashboard", icon: <DashboardIcon />, path: "/admin/dashboard" },
-        { text: "Budgeting", icon: <MonetizationOn />, path: "/admin/budget" },
-        { text: "Expenses", icon: <ExpensesIcon />, path: "/admin/expenses" },
-        { text: "Reimbursement", icon: <AccountBalanceWallet />, path: "/admin/reimbursements" },
-        { text: "Reports", icon: <ReportsIcon />, path: "/admin/report" },
-        { text: "Users", icon: <UsersIcon />, path: "/admin/user" },
-        { text: "Settings", icon: <SettingsIcon />, path: "/admin/settings" }
+        { 
+            text: "Dashboard", 
+            icon: <DashboardIcon />, 
+            path: "/admin/dashboard",
+            gradient: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
+            color: "#3b82f6"
+        },
+        { 
+            text: "Budgeting", 
+            icon: <MonetizationOn />, 
+            path: "/admin/budget",
+            gradient: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)",
+            color: "#8b5cf6"
+        },
+        { 
+            text: "Expenses", 
+            icon: <ExpensesIcon />, 
+            path: "/admin/expenses",
+            gradient: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+            color: "#10b981"
+        },
+        { 
+            text: "Reimbursement", 
+            icon: <AccountBalanceWallet />, 
+            path: "/admin/reimbursements",
+            gradient: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+            color: "#f59e0b"
+        },
+        { 
+            text: "Reports", 
+            icon: <ReportsIcon />, 
+            path: "/admin/report",
+            gradient: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+            color: "#ef4444"
+        },
+        { 
+            text: "Users", 
+            icon: <UsersIcon />, 
+            path: "/admin/user",
+            gradient: "linear-gradient(135deg, #ec4899 0%, #db2777 100%)",
+            color: "#ec4899"
+        },
+        { 
+            text: "Settings", 
+            icon: <SettingsIcon />, 
+            path: "/admin/settings",
+            gradient: "linear-gradient(135deg, #6b7280 0%, #4b5563 100%)",
+            color: "#6b7280"
+        }
     ];
 
+    // Set active item based on current path
     useEffect(() => {
-        setActiveItem(location.pathname);
+        const currentPath = location.pathname;
+        const matchingItem = menuItems.find(item => currentPath.startsWith(item.path));
+        if (matchingItem) {
+            setActiveItem(matchingItem.path);
+        } else {
+            setActiveItem(currentPath);
+        }
     }, [location.pathname]);
 
     const handleMenuItemClick = (path) => {
-        navigate(path);
-        setActiveItem(path);
-        if (isMobile) onClose();
+        setLoadingItems(prev => ({ ...prev, [path]: true }));
+        
+        setTimeout(() => {
+            navigate(path);
+            if (isMobile) onClose();
+            setLoadingItems(prev => ({ ...prev, [path]: false }));
+        }, 300);
     };
 
     const handleLogoutClick = async () => {
-        await dispatch(logout(csrf))
+        await dispatch(logout(csrf));
     };
 
-    // Logo Component - Same as your original
+    // Logo Component
     const Logo = () => (
         <Box
             sx={{
@@ -75,29 +129,27 @@ const AdminSidebar = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 width: '100%',
-                padding: isSmallMobile ? '4px 0' : '6px 0',
+                padding: { xs: '10px 0', md: '20px 0 10px 0' },
             }}
         >
             <Box
                 sx={{
-                    width: isSmallMobile ? '180px' : isMobile ? '250px' : '320px',
-                    height: isSmallMobile ? '80px' : isMobile ? '80px' : '90px',
+                    width: { xs: '160px', md: '200px' },
+                    height: { xs: '40px', md: '50px' },
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     overflow: 'hidden',
-                    borderRadius: 2,
-                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                    padding: '4px',
                 }}
             >
                 <img
                     src="/image.png"
-                    alt="Company Logo"
+                    alt="DEMANDCURVE"
                     style={{
-                        width: '100%',
+                        width: 'auto',
                         height: '100%',
-                        // objectFit: 'contain',
+                        maxWidth: '100%',
+                        objectFit: 'contain',
                     }}
                     onError={(e) => {
                         e.target.src = "/image.svg";
@@ -105,8 +157,7 @@ const AdminSidebar = ({
                             e.target.src = "/vite.svg";
                             e.target.onerror = () => {
                                 e.target.style.display = 'none';
-                                const fallback = e.target.parentElement.querySelector('.logo-fallback');
-                                if (fallback) fallback.style.display = 'flex';
+                                e.target.parentElement.style.display = 'none';
                             };
                         };
                     }}
@@ -115,47 +166,144 @@ const AdminSidebar = ({
         </Box>
     );
 
-    const SidebarContent = () => (
-        <Box sx={{
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-            background: '#ffffff',
-            color: '#333333',
-            transition: 'all 0.3s ease',
-            position: 'relative',
-            overflow: 'hidden',
-            boxShadow: '0 0 20px rgba(0, 0, 0, 0.1)',
-        }}>
-            {/* Header with Full Logo */}
-            <Box sx={{
-                p: isSmallMobile ? 0 : 1,
+    // User Profile Component
+    const UserProfile = () => (
+        <Box
+            sx={{
+                p: { xs: 1.5, md: 2 },
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
+                gap: { xs: 1, md: 2 },
+                borderRadius: '12px',
+                margin: { xs: '0 12px 12px', md: '0 16px 16px' },
+                background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
+            }}
+        >
+            <Avatar
+                sx={{
+                    width: { xs: 36, md: 40 },
+                    height: { xs: 36, md: 40 },
+                    backgroundColor: '#3b82f6',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: { xs: '0.9rem', md: '1rem' },
+                    fontFamily: "'Poppins', sans-serif",
+                }}
+            >
+                {user?.name?.charAt(0)?.toUpperCase() || 'M'}
+            </Avatar>
+            
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography
+                    variant="subtitle2"
+                    sx={{
+                        fontWeight: 600,
+                        color: '#1f2937',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        fontFamily: "'Poppins', sans-serif",
+                        fontSize: { xs: '0.8rem', md: '0.9rem' },
+                    }}
+                >
+                    {user?.name || 'Malik Muzammil'}
+                </Typography>
+                <Typography
+                    variant="caption"
+                    sx={{
+                        color: '#6b7280',
+                        display: 'block',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        fontFamily: "'Poppins', sans-serif",
+                        textTransform: 'uppercase',
+                        fontSize: { xs: '0.6rem', md: '0.7rem' },
+                        letterSpacing: '0.5px',
+                        fontWeight: 600,
+                    }}
+                >
+                    {user?.role || 'superadmin'}
+                </Typography>
+            </Box>
+        </Box>
+    );
+
+    const SidebarContent = () => (
+        <Box 
+            sx={{
+                height: "100vh",
+                display: "flex",
+                flexDirection: "column",
+                background: '#ffffff',
+                color: '#334155',
                 position: 'relative',
-                minHeight: isSmallMobile ? '55px' : '97px',
-                background: 'rgba(255, 255, 255, 0.9)',
-                borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
+                overflow: 'hidden',
+                boxShadow: '0 0 20px rgba(0, 0, 0, 0.05)',
+                fontFamily: "'Poppins', sans-serif",
+                width: '100%',
+            }}
+        >
+            {/* Font import in global CSS is recommended, but here's local fallback */}
+            <style>
+                {`
+                @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+                * {
+                    font-family: 'Poppins', sans-serif;
+                }
+                `}
+            </style>
+
+            {/* Header */}
+            <Box sx={{
+                p: { xs: '15px 15px 8px 15px', md: '20px 20px 10px 20px' },
+                position: 'relative',
+                zIndex: 1,
+                borderBottom: '1px solid #e5e7eb',
             }}>
                 <Logo />
             </Box>
 
-            <Divider sx={{
-                my: 1,
-                mx: isSmallMobile ? 1 : 2,
-                background: 'rgba(0, 0, 0, 0.05)',
+            {/* User Profile */}
+            <UserProfile />
+
+            <Divider sx={{ 
+                mx: { xs: 1.5, md: 2 }, 
+                mb: 1, 
+                borderColor: '#e5e7eb' 
             }} />
 
             {/* Navigation Menu */}
-            <List sx={{
-                flex: 1,
-                px: isSmallMobile ? 1 : 2,
-                py: 1
-            }}>
+            <List 
+                sx={{
+                    flex: 1,
+                    px: { xs: 1.5, md: 2 },
+                    py: 1,
+                    overflowY: 'auto',
+                    overflowX: 'hidden',
+                    '&::-webkit-scrollbar': {
+                        width: '4px',
+                    },
+                    '&::-webkit-scrollbar-track': {
+                        background: 'transparent',
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                        background: 'rgba(59, 130, 246, 0.2)',
+                        borderRadius: '2px',
+                    },
+                    '&::-webkit-scrollbar-thumb:hover': {
+                        background: 'rgba(59, 130, 246, 0.4)',
+                    },
+                }}
+            >
                 {menuItems.map((item) => {
                     const isActive = activeItem === item.path;
                     const isHovered = hoveredItem === item.path;
+                    const isLoading = loadingItems[item.path];
 
                     return (
                         <ListItem
@@ -164,104 +312,85 @@ const AdminSidebar = ({
                             onMouseEnter={() => setHoveredItem(item.path)}
                             onMouseLeave={() => setHoveredItem(null)}
                             sx={{
-                                borderRadius: 2,
-                                mb: 1,
-                                mx: isSmallMobile ? 0 : 0.5,
-                                px: isSmallMobile ? 1.5 : 2,
-                                py: isSmallMobile ? 1 : 1.25,
-                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                borderRadius: '10px',
+                                mb: 0.5,
+                                px: { xs: 1.5, md: 2 },
+                                py: { xs: 1, md: 1.25 },
+                                transition: 'all 0.2s ease',
                                 position: 'relative',
                                 overflow: 'hidden',
                                 cursor: 'pointer',
                                 background: isActive
-                                    ? 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)'
-                                    : isHovered
-                                        ? 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)'
-                                        : 'transparent',
+                                    ? item.gradient
+                                    : 'transparent',
                                 border: isActive
-                                    ? '1px solid #3b82f6'
+                                    ? 'none'
                                     : '1px solid transparent',
-                                transform: isHovered ? 'translateX(8px) scale(1.02)' : 'translateX(0) scale(1)',
-                                boxShadow: isActive
-                                    ? '0 4px 15px rgba(59, 130, 246, 0.3)'
-                                    : isHovered
-                                        ? '0 4px 15px rgba(59, 130, 246, 0.2)'
-                                        : 'none',
-                                '&::before': isActive ? {
-                                    content: '""',
-                                    position: 'absolute',
-                                    left: 0,
-                                    top: '50%',
-                                    transform: 'translateY(-50%)',
-                                    width: 4,
-                                    height: '60%',
-                                    background: '#1e40af',
-                                    borderRadius: '0 2px 2px 0'
-                                } : {},
                                 '&:hover': {
-                                    boxShadow: '0 6px 20px rgba(59, 130, 246, 0.25)',
+                                    background: isActive ? item.gradient : 'rgba(59, 130, 246, 0.05)',
+                                    borderColor: isActive ? 'transparent' : 'rgba(59, 130, 246, 0.2)',
+                                    transform: 'translateX(2px)',
+                                    '& .menu-icon': {
+                                        color: isActive ? 'white' : item.color,
+                                    }
+                                },
+                                '&:active': {
+                                    transform: 'translateX(0)',
                                 }
                             }}
                         >
                             <ListItemIcon
                                 sx={{
-                                    color: isActive || isHovered ? 'white' : '#6b7280',
-                                    minWidth: isSmallMobile ? 32 : 40,
-                                    transition: 'all 0.3s ease',
-                                    transform: isHovered ? 'scale(1.1)' : 'scale(1)'
+                                    color: isActive ? 'white' : '#6b7280',
+                                    minWidth: { xs: '32px', md: '36px' },
+                                    marginRight: { xs: 1.5, md: 2 },
+                                    transition: 'all 0.2s ease',
                                 }}
+                                className="menu-icon"
                             >
                                 {item.icon}
                             </ListItemIcon>
+                            
                             <ListItemText
                                 primary={
-                                    <Box sx={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 1
-                                    }}>
-                                        <Typography
-                                            variant="body2"
-                                            sx={{
-                                                fontWeight: isActive ? 600 : 500,
-                                                color: isActive || isHovered ? 'white' : '#374151',
-                                                fontSize: isSmallMobile ? '0.8rem' : '0.875rem',
-                                                transition: 'all 0.3s ease',
-                                                letterSpacing: '0.2px',
-                                            }}
-                                        >
-                                            {item.text}
-                                        </Typography>
-                                        {item.notification > 0 && (
-                                            <Chip
-                                                label={item.notification}
-                                                size="small"
-                                                sx={{
-                                                    height: 20,
-                                                    fontSize: '0.7rem',
-                                                    minWidth: 20,
-                                                    backgroundColor: isActive || isHovered ? 'rgba(255, 255, 255, 0.2)' : '#ef4444',
-                                                    color: isActive || isHovered ? 'white' : 'white',
-                                                    '& .MuiChip-label': { px: 0.5 }
-                                                }}
-                                            />
-                                        )}
-                                        {item.badge && (
-                                            <Chip
-                                                label={item.badge}
-                                                size="small"
-                                                sx={{
-                                                    height: 18,
-                                                    fontSize: '0.6rem',
-                                                    minWidth: 30,
-                                                    backgroundColor: isActive || isHovered ? 'rgba(255, 255, 255, 0.2)' : '#3b82f6',
-                                                    color: isActive || isHovered ? 'white' : 'white',
-                                                }}
-                                            />
-                                        )}
-                                    </Box>
+                                    <Typography
+                                        variant="body2"
+                                        sx={{
+                                            fontWeight: isActive ? 600 : 500,
+                                            color: isActive ? 'white' : '#374151',
+                                            fontSize: { xs: '0.8rem', md: '0.875rem' },
+                                            transition: 'all 0.2s ease',
+                                            fontFamily: "'Poppins', sans-serif",
+                                            letterSpacing: '0.2px',
+                                        }}
+                                    >
+                                        {item.text}
+                                    </Typography>
                                 }
+                                sx={{
+                                    '& .MuiListItemText-primary': {
+                                        fontFamily: "'Poppins', sans-serif",
+                                    }
+                                }}
                             />
+                            
+                            {/* Loading indicator */}
+                            {isLoading && (
+                                <LinearProgress 
+                                    sx={{ 
+                                        position: 'absolute',
+                                        bottom: 0,
+                                        left: 0,
+                                        right: 0,
+                                        height: 2,
+                                        background: 'transparent',
+                                        '& .MuiLinearProgress-bar': {
+                                            background: item.gradient,
+                                            animationDuration: '1.5s',
+                                        }
+                                    }} 
+                                />
+                            )}
                         </ListItem>
                     );
                 })}
@@ -269,68 +398,106 @@ const AdminSidebar = ({
 
             {/* Logout Button */}
             <Box sx={{
-                p: isSmallMobile ? 1.5 : 2.5,
-                pt: 0
+                p: { xs: 1.5, md: 2 },
+                pt: 0,
             }}>
                 <ListItem
-                    button
                     onClick={handleLogoutClick}
                     disabled={logoutLoader}
                     onMouseEnter={() => setHoveredItem('logout')}
                     onMouseLeave={() => setHoveredItem(null)}
                     sx={{
-                        borderRadius: 2,
-                        px: isSmallMobile ? 1.5 : 2,
-                        py: isSmallMobile ? 1 : 1.5,
+                        borderRadius: '10px',
+                        px: { xs: 1.5, md: 2 },
+                        py: { xs: 1, md: 1.25 },
                         background: hoveredItem === 'logout'
                             ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
-                            : 'rgba(239, 68, 68, 0.1)',
-                        border: `1px solid ${hoveredItem === 'logout' ? '#ef4444' : 'rgba(239, 68, 68, 0.2)'}`,
+                            : 'transparent',
+                        border: `1px solid ${hoveredItem === 'logout' 
+                            ? '#ef4444' 
+                            : 'rgba(239, 68, 68, 0.1)'}`,
                         color: hoveredItem === 'logout' ? 'white' : '#ef4444',
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        transform: hoveredItem === 'logout' ? 'translateX(8px) scale(1.02)' : 'translateX(0) scale(1)',
-                        boxShadow: hoveredItem === 'logout'
-                            ? '0 4px 15px rgba(239, 68, 68, 0.3)'
-                            : 'none',
+                        transition: 'all 0.2s ease',
+                        cursor: logoutLoader ? 'not-allowed' : 'pointer',
                         '&:hover': {
-                            boxShadow: '0 6px 20px rgba(239, 68, 68, 0.25)',
+                            background: !logoutLoader ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' : 'transparent',
+                            color: !logoutLoader ? 'white' : '#ef4444',
+                            borderColor: !logoutLoader ? '#ef4444' : 'rgba(239, 68, 68, 0.1)',
+                            transform: 'translateX(2px)',
+                        },
+                        '&:active': {
+                            transform: 'translateX(0)',
                         },
                         '&:disabled': {
                             opacity: 0.6,
+                            cursor: 'not-allowed',
                             transform: 'none',
                         }
                     }}
                 >
-                    <ListItemIcon sx={{
-                        color: 'inherit',
-                        minWidth: isSmallMobile ? 32 : 40,
-                        transition: 'all 0.3s ease',
-                        transform: hoveredItem === 'logout' ? 'scale(1.1)' : 'scale(1)'
-                    }}>
-                        <LogoutIcon />
-                    </ListItemIcon>
-                    <ListItemText
-                        primary={"Logout"}
-                        primaryTypographyProps={{
-                            fontWeight: 600,
-                            fontSize: isSmallMobile ? '0.85rem' : '0.95rem',
-                            color: 'inherit'
+                    <ListItemIcon 
+                        sx={{
+                            color: 'inherit',
+                            minWidth: { xs: '32px', md: '36px' },
+                            marginRight: { xs: 1.5, md: 2 },
+                            transition: 'all 0.2s ease',
                         }}
+                    >
+                        <LogoutIcon fontSize={isMobile ? "small" : "medium"} />
+                    </ListItemIcon>
+                    
+                    <ListItemText
+                        primary={
+                            <Typography
+                                sx={{
+                                    fontWeight: 600,
+                                    fontSize: { xs: '0.8rem', md: '0.875rem' },
+                                    color: 'inherit',
+                                    fontFamily: "'Poppins', sans-serif",
+                                }}
+                            >
+                                {logoutLoader ? "Logging out..." : "Logout"}
+                            </Typography>
+                        }
                     />
+                    
+                    {logoutLoader && (
+                        <Box 
+                            sx={{
+                                width: { xs: 14, md: 16 },
+                                height: { xs: 14, md: 16 },
+                                borderRadius: '50%',
+                                border: '2px solid rgba(255,255,255,0.3)',
+                                borderTopColor: 'white',
+                                animation: 'spin 1s linear infinite',
+                                marginLeft: 1,
+                            }} 
+                        />
+                    )}
                 </ListItem>
             </Box>
 
-            {/* Global Styles for Animations */}
-            <style jsx>{`
-                @keyframes spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-            `}</style>
+            {/* Version Info */}
+            <Box sx={{
+                p: { xs: 1, md: 2 },
+                textAlign: 'center',
+                borderTop: '1px solid #e5e7eb',
+            }}>
+                <Typography 
+                    variant="caption" 
+                    sx={{
+                        color: '#6b7280',
+                        fontSize: { xs: '0.7rem', md: '0.75rem' },
+                        opacity: 0.7,
+                        fontFamily: "'Poppins', sans-serif",
+                        letterSpacing: '0.3px',
+                    }}
+                >
+                    Admin Dashboard v2.0
+                </Typography>
+            </Box>
         </Box>
     );
-
-    const drawerWidth = isSmallMobile ? 280 : 320;
 
     return (
         <>
@@ -341,21 +508,19 @@ const AdminSidebar = ({
                 onClose={onClose}
                 ModalProps={{
                     keepMounted: true,
-                    BackdropProps: {
-                        sx: {
-                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                            backdropFilter: 'blur(8px)'
-                        }
-                    }
                 }}
                 sx={{
                     display: { xs: 'block', md: 'none' },
                     '& .MuiDrawer-paper': {
                         boxSizing: 'border-box',
-                        width: drawerWidth,
+                        width: { xs: 260, sm: 280 },
                         border: 'none',
-                        boxShadow: '16px 0 40px rgba(0, 0, 0, 0.15)',
-                        transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        boxShadow: '10px 0 30px rgba(0, 0, 0, 0.1)',
+                        fontFamily: "'Poppins', sans-serif",
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        zIndex: 1300,
                     }
                 }}
             >
@@ -367,17 +532,20 @@ const AdminSidebar = ({
                 variant="permanent"
                 sx={{
                     display: { xs: 'none', md: 'block' },
+                    width: 280,
+                    flexShrink: 0,
                     '& .MuiDrawer-paper': {
                         boxSizing: 'border-box',
-                        width: 300,
+                        width: 280,
                         border: 'none',
-                        boxShadow: '4px 0 20px rgba(0, 0, 0, 0.1)',
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        boxShadow: '2px 0 15px rgba(0, 0, 0, 0.05)',
                         position: 'fixed',
                         height: '100vh',
                         top: 0,
                         left: 0,
-                        zIndex: 1200
+                        zIndex: 1200,
+                        fontFamily: "'Poppins', sans-serif",
+                        overflowX: 'hidden',
                     }
                 }}
                 open

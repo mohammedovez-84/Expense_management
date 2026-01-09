@@ -17,7 +17,9 @@ import {
   Chip,
   keyframes,
   styled,
-  GlobalStyles
+  GlobalStyles,
+  Container,
+  useMediaQuery
 } from "@mui/material";
 import { useBudgeting } from "../../hooks/useBudgeting";
 import { useDispatch } from "react-redux";
@@ -29,6 +31,9 @@ import GroupsIcon from "@mui/icons-material/Groups";
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import MenuIcon from '@mui/icons-material/Menu';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import SearchIcon from '@mui/icons-material/Search';
 import BudgetForm from "../../components/admin/budgeting/BudgetForm";
 import BudgetTable from "../../components/admin/budgeting/BudgetTable";
 import EditBudgetModal from "../../components/admin/budgeting/BudgetEditModal";
@@ -103,6 +108,13 @@ const GlassCard = styled(Card)(({ theme, cardcolor }) => ({
     background: `conic-gradient(transparent, ${alpha(cardcolor || theme.palette.primary.main, 0.1)}, transparent 30%)`,
     animation: `${gradientAnimation} 3s linear infinite`,
     pointerEvents: 'none',
+  },
+  // Responsive adjustments
+  [theme.breakpoints.down('sm')]: {
+    borderRadius: '12px',
+    '&:hover': {
+      transform: 'translateY(-4px)',
+    }
   }
 }));
 
@@ -147,6 +159,7 @@ const AnimatedNumber = ({ value, duration = 1000 }) => {
 const StatCard = React.memo(({ stat, index }) => {
   const theme = useTheme();
   const [hovered, setHovered] = useState(false);
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   return (
     <GlassCard 
@@ -155,19 +168,30 @@ const StatCard = React.memo(({ stat, index }) => {
         animation: `${slideInFromLeft} 0.5s ease forwards`,
         animationDelay: `${index * 0.1}s`,
         opacity: 0,
-        height: '100%'
+        height: '100%',
+        minHeight: { xs: 180, sm: 200, md: 220 }
       }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseEnter={() => !isMobile && setHovered(true)}
+      onMouseLeave={() => !isMobile && setHovered(false)}
+      onClick={() => isMobile && setHovered(!hovered)}
     >
-      <CardContent sx={{ p: 3, position: 'relative', zIndex: 1 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-          <Box>
+      <CardContent sx={{ 
+        p: { xs: 2, sm: 2.5, md: 3 }, 
+        position: 'relative', 
+        zIndex: 1 
+      }}>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'flex-start', 
+          mb: { xs: 1.5, md: 2 } 
+        }}>
+          <Box sx={{ flex: 1 }}>
             <PoppinsTypography variant="subtitle2" sx={{ 
               color: 'text.secondary', 
               fontWeight: 500, 
               mb: 0.5,
-              fontSize: '0.875rem',
+              fontSize: { xs: '0.75rem', sm: '0.8125rem', md: '0.875rem' },
               letterSpacing: '0.3px'
             }}>
               {stat.title}
@@ -176,8 +200,9 @@ const StatCard = React.memo(({ stat, index }) => {
               fontWeight: 700, 
               color: stat.color, 
               mb: 0.5,
-              fontSize: { xs: '1.5rem', md: '2rem' },
-              letterSpacing: '-0.5px'
+              fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' },
+              letterSpacing: { xs: '-0.25px', md: '-0.5px' },
+              lineHeight: 1.2
             }}>
               <AnimatedNumber value={stat.value} />
             </PoppinsTypography>
@@ -186,7 +211,8 @@ const StatCard = React.memo(({ stat, index }) => {
               display: 'flex',
               alignItems: 'center',
               gap: 0.5,
-              fontWeight: 400
+              fontWeight: 400,
+              fontSize: { xs: '0.7rem', sm: '0.75rem' }
             }}>
               <Box 
                 sx={{ 
@@ -201,9 +227,9 @@ const StatCard = React.memo(({ stat, index }) => {
           </Box>
           
           <Box sx={{
-            width: 52,
-            height: 52,
-            borderRadius: '14px',
+            width: { xs: 44, sm: 48, md: 52 },
+            height: { xs: 44, sm: 48, md: 52 },
+            borderRadius: { xs: '12px', md: '14px' },
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -214,8 +240,14 @@ const StatCard = React.memo(({ stat, index }) => {
             position: 'relative',
             overflow: 'hidden',
             boxShadow: `0 4px 20px ${alpha(stat.color, 0.3)}`,
+            flexShrink: 0,
+            ml: 1
           }}>
-            {React.cloneElement(stat.icon, { sx: { fontSize: 26 } })}
+            {React.cloneElement(stat.icon, { 
+              sx: { 
+                fontSize: { xs: 22, sm: 24, md: 26 } 
+              } 
+            })}
           </Box>
         </Box>
         
@@ -223,29 +255,36 @@ const StatCard = React.memo(({ stat, index }) => {
           <Box sx={{ 
             display: 'flex', 
             alignItems: 'center', 
-            mt: 2, 
-            pt: 2, 
-            borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}` 
+            mt: { xs: 1.5, md: 2 }, 
+            pt: { xs: 1.5, md: 2 }, 
+            borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+            flexWrap: 'wrap',
+            gap: 0.5
           }}>
             <Box sx={{ 
               display: 'flex', 
               alignItems: 'center',
-              padding: '4px 10px',
+              padding: '3px 8px',
               borderRadius: '20px',
               background: alpha(stat.trendColor || (stat.trend.startsWith('+') ? '#10b981' : '#ef4444'), 0.1),
               color: stat.trendColor || (stat.trend.startsWith('+') ? '#10b981' : '#ef4444'),
-              fontSize: '0.75rem',
+              fontSize: { xs: '0.7rem', sm: '0.75rem' },
               fontWeight: 600,
               fontFamily: '"Poppins", sans-serif'
             }}>
               {stat.trend.startsWith('+') ? (
-                <TrendingUpIcon sx={{ fontSize: 16, mr: 0.5 }} />
+                <TrendingUpIcon sx={{ fontSize: { xs: 14, sm: 16 }, mr: 0.5 }} />
               ) : (
-                <TrendingDownIcon sx={{ fontSize: 16, mr: 0.5 }} />
+                <TrendingDownIcon sx={{ fontSize: { xs: 14, sm: 16 }, mr: 0.5 }} />
               )}
               {stat.trend}
             </Box>
-            <PoppinsTypography variant="caption" sx={{ color: 'text.secondary', ml: 1, fontWeight: 400 }}>
+            <PoppinsTypography variant="caption" sx={{ 
+              color: 'text.secondary', 
+              ml: 0.5, 
+              fontWeight: 400,
+              fontSize: { xs: '0.7rem', sm: '0.75rem' }
+            }}>
               vs last month
             </PoppinsTypography>
           </Box>
@@ -257,39 +296,77 @@ const StatCard = React.memo(({ stat, index }) => {
 
 const BudgetingHeader = () => {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
   return (
     <Box sx={{ 
-      mb: 4,
+      mb: { xs: 2, sm: 3, md: 4 },
       animation: `${fadeIn} 0.6s ease forwards`
     }}>
       <Box sx={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
-        alignItems: 'center',
+        alignItems: 'flex-start',
         flexWrap: 'wrap',
         gap: 2
       }}>
-        <Box>
+        <Box sx={{ flex: 1, minWidth: { xs: '100%', sm: 'auto' } }}>
           <PoppinsTypography variant="h4" sx={{ 
             fontWeight: 700, 
             background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
-            mb: 0.5,
-            fontSize: { xs: '1.75rem', md: '2.125rem' },
-            letterSpacing: '-0.5px'
+            mb: 1,
+            fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' },
+            letterSpacing: { xs: '-0.25px', md: '-0.5px' },
+            lineHeight: 1.2
           }}>
             Budget Management
           </PoppinsTypography>
           <PoppinsTypography variant="body1" sx={{ 
             color: 'text.secondary',
-            maxWidth: '600px',
             fontWeight: 400,
-            fontSize: '0.95rem'
+            fontSize: { xs: '0.85rem', sm: '0.9rem', md: '0.95rem' },
+            lineHeight: 1.4
           }}>
             Allocate, track, and manage budgets efficiently across departments and teams
           </PoppinsTypography>
+        </Box>
+        
+        <Box sx={{ 
+          display: 'flex', 
+          gap: 1,
+          mt: { xs: 1, sm: 0 }
+        }}>
+          <Button
+            variant="outlined"
+            size={isMobile ? "small" : "medium"}
+            startIcon={<FilterListIcon />}
+            sx={{
+              textTransform: 'none',
+              fontWeight: 500,
+              borderRadius: '12px',
+              fontFamily: '"Poppins", sans-serif',
+              minWidth: 'auto'
+            }}
+          >
+            {!isMobile && 'Filters'}
+          </Button>
+          <Button
+            variant="contained"
+            size={isMobile ? "small" : "medium"}
+            startIcon={<SearchIcon />}
+            sx={{
+              textTransform: 'none',
+              fontWeight: 600,
+              borderRadius: '12px',
+              fontFamily: '"Poppins", sans-serif',
+              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+              minWidth: 'auto'
+            }}
+          >
+            {!isMobile && 'Search'}
+          </Button>
         </Box>
       </Box>
     </Box>
@@ -298,6 +375,8 @@ const BudgetingHeader = () => {
 
 const BudgetUsageChart = () => {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  
   const usageData = [
     { department: 'Sales', allocated: 100000, spent: 75000, remaining: 25000 },
     { department: 'Data', allocated: 80000, spent: 45000, remaining: 35000 },
@@ -311,49 +390,93 @@ const BudgetUsageChart = () => {
   const overallUsage = ((totalSpent / totalAllocated) * 100).toFixed(1);
 
   return (
-    <GlassCard sx={{ height: '100%' }}>
-      <CardContent sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+    <GlassCard sx={{ height: '100%', minHeight: { xs: 500, sm: 450 } }}>
+      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: { xs: 'flex-start', sm: 'center' }, 
+          mb: 3,
+          flexDirection: { xs: 'column', sm: 'row' },
+          gap: { xs: 1, sm: 0 }
+        }}>
           <Box>
-            <PoppinsTypography variant="h6" sx={{ fontWeight: 600, mb: 0.5, fontSize: '1.1rem' }}>
+            <PoppinsTypography variant="h6" sx={{ 
+              fontWeight: 600, 
+              mb: 0.5, 
+              fontSize: { xs: '1rem', sm: '1.1rem' } 
+            }}>
               Budget Usage Overview
             </PoppinsTypography>
-            <PoppinsTypography variant="body2" sx={{ color: 'text.secondary', fontWeight: 400 }}>
+            <PoppinsTypography variant="body2" sx={{ 
+              color: 'text.secondary', 
+              fontWeight: 400,
+              fontSize: { xs: '0.8rem', sm: '0.875rem' }
+            }}>
               Department-wise budget utilization
             </PoppinsTypography>
           </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <PoppinsTypography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 1,
+            mt: { xs: 0.5, sm: 0 }
+          }}>
+            <PoppinsTypography variant="body2" sx={{ 
+              color: 'text.secondary', 
+              fontWeight: 500,
+              fontSize: { xs: '0.8rem', sm: '0.875rem' }
+            }}>
               Overall Usage:
             </PoppinsTypography>
             <PoppinsTypography variant="h6" sx={{ 
               fontWeight: 700, 
-              color: overallUsage > 80 ? '#ef4444' : overallUsage > 60 ? '#f59e0b' : '#10b981' 
+              color: overallUsage > 80 ? '#ef4444' : overallUsage > 60 ? '#f59e0b' : '#10b981',
+              fontSize: { xs: '1rem', sm: '1.1rem' }
             }}>
               {overallUsage}%
             </PoppinsTypography>
           </Box>
         </Box>
 
-        <Box sx={{ mt: 3 }}>
+        <Box sx={{ mt: 2 }}>
           {usageData.map((dept, index) => {
             const usagePercentage = ((dept.spent / dept.allocated) * 100).toFixed(1);
             const progressColor = usagePercentage > 80 ? '#ef4444' : usagePercentage > 60 ? '#f59e0b' : '#10b981';
             
             return (
-              <Box key={dept.department} sx={{ mb: 3 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                  <PoppinsTypography variant="body2" sx={{ fontWeight: 500 }}>
+              <Box key={dept.department} sx={{ mb: 2.5 }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center', 
+                  mb: 1,
+                  flexWrap: 'wrap',
+                  gap: 0.5
+                }}>
+                  <PoppinsTypography variant="body2" sx={{ 
+                    fontWeight: 500,
+                    fontSize: { xs: '0.85rem', sm: '0.875rem' }
+                  }}>
                     {dept.department}
                   </PoppinsTypography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <PoppinsTypography variant="caption" sx={{ color: 'text.secondary', fontWeight: 400 }}>
-                      ₹{dept.spent.toLocaleString()} / ₹{dept.allocated.toLocaleString()}
+                  <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: { xs: 1, sm: 2 },
+                    flexWrap: 'wrap'
+                  }}>
+                    <PoppinsTypography variant="caption" sx={{ 
+                      color: 'text.secondary', 
+                      fontWeight: 400,
+                      fontSize: { xs: '0.75rem', sm: '0.8125rem' }
+                    }}>
+                      {isMobile ? `₹${(dept.spent/1000)}k` : `₹${dept.spent.toLocaleString()}`} / {isMobile ? `₹${(dept.allocated/1000)}k` : `₹${dept.allocated.toLocaleString()}`}
                     </PoppinsTypography>
                     <PoppinsTypography variant="body2" sx={{ 
                       fontWeight: 600, 
                       color: progressColor,
-                      fontSize: '0.875rem'
+                      fontSize: { xs: '0.85rem', sm: '0.875rem' }
                     }}>
                       {usagePercentage}%
                     </PoppinsTypography>
@@ -361,8 +484,8 @@ const BudgetUsageChart = () => {
                 </Box>
                 <Box sx={{ 
                   width: '100%', 
-                  height: 8, 
-                  borderRadius: 4,
+                  height: 6, 
+                  borderRadius: 3,
                   background: alpha(progressColor, 0.1),
                   position: 'relative',
                   overflow: 'hidden'
@@ -375,19 +498,30 @@ const BudgetUsageChart = () => {
                       height: '100%',
                       width: `${usagePercentage}%`,
                       background: `linear-gradient(90deg, ${progressColor}, ${alpha(progressColor, 0.7)})`,
-                      borderRadius: 4,
+                      borderRadius: 3,
                       animation: `${fadeIn} 1s ease forwards`,
                       animationDelay: `${index * 0.2}s`
                     }}
                   />
                 </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
-                  <PoppinsTypography variant="caption" sx={{ color: 'text.secondary', fontWeight: 400 }}>
-                    Remaining: ₹{dept.remaining.toLocaleString()}
+                <Box sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  mt: 0.5,
+                  flexWrap: 'wrap',
+                  gap: 0.5
+                }}>
+                  <PoppinsTypography variant="caption" sx={{ 
+                    color: 'text.secondary', 
+                    fontWeight: 400,
+                    fontSize: { xs: '0.7rem', sm: '0.75rem' }
+                  }}>
+                    Remaining: {isMobile ? `₹${(dept.remaining/1000)}k` : `₹${dept.remaining.toLocaleString()}`}
                   </PoppinsTypography>
                   <PoppinsTypography variant="caption" sx={{ 
                     color: progressColor,
-                    fontWeight: 500
+                    fontWeight: 500,
+                    fontSize: { xs: '0.7rem', sm: '0.75rem' }
                   }}>
                     {usagePercentage > 80 ? 'Over Budget' : usagePercentage > 60 ? 'Near Limit' : 'On Track'}
                   </PoppinsTypography>
@@ -399,27 +533,34 @@ const BudgetUsageChart = () => {
 
         <Box sx={{ 
           display: 'flex', 
-          justifyContent: 'center', 
-          gap: 3, 
-          mt: 4, 
+          justifyContent: 'space-between', 
+          gap: { xs: 1, sm: 2, md: 3 }, 
+          mt: 3, 
           pt: 3, 
           borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
           flexWrap: 'wrap' 
         }}>
           {[
-            { label: 'Allocated', color: '#3b82f6', value: `₹${totalAllocated.toLocaleString()}` },
-            { label: 'Spent', color: '#ef4444', value: `₹${totalSpent.toLocaleString()}` },
-            { label: 'Remaining', color: '#10b981', value: `₹${(totalAllocated - totalSpent).toLocaleString()}` }
+            { label: 'Allocated', color: '#3b82f6', value: `₹${isMobile ? `${(totalAllocated/1000)}k` : totalAllocated.toLocaleString()}` },
+            { label: 'Spent', color: '#ef4444', value: `₹${isMobile ? `${(totalSpent/1000)}k` : totalSpent.toLocaleString()}` },
+            { label: 'Remaining', color: '#10b981', value: `₹${isMobile ? `${((totalAllocated - totalSpent)/1000)}k` : (totalAllocated - totalSpent).toLocaleString()}` }
           ].map((item, index) => (
-            <Box key={item.label} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box key={item.label} sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 1,
+              flex: { xs: '1 1 calc(33.333% - 8px)', sm: 'none' },
+              minWidth: { xs: 'calc(50% - 8px)', sm: 'auto' }
+            }}>
               <Box sx={{ 
-                width: 12, 
-                height: 12, 
+                width: 10, 
+                height: 10, 
                 borderRadius: '4px', 
                 background: item.color,
                 animation: `${pulseAnimation} 2s infinite`,
                 animationDelay: `${index * 0.5}s`,
                 position: 'relative',
+                flexShrink: 0,
                 '&::after': {
                   content: '""',
                   position: 'absolute',
@@ -432,11 +573,25 @@ const BudgetUsageChart = () => {
                   opacity: 0.3,
                 }
               }} />
-              <Box>
-                <PoppinsTypography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontWeight: 400 }}>
+              <Box sx={{ minWidth: 0 }}>
+                <PoppinsTypography variant="caption" sx={{ 
+                  color: 'text.secondary', 
+                  display: 'block', 
+                  fontWeight: 400,
+                  fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
                   {item.label}
                 </PoppinsTypography>
-                <PoppinsTypography variant="body2" sx={{ fontWeight: 600, fontSize: '0.95rem' }}>
+                <PoppinsTypography variant="body2" sx={{ 
+                  fontWeight: 600, 
+                  fontSize: { xs: '0.85rem', sm: '0.95rem' },
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
                   {item.value}
                 </PoppinsTypography>
               </Box>
@@ -450,6 +605,8 @@ const BudgetUsageChart = () => {
 
 const RecentBudgetActivities = () => {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  
   const activities = [
     { id: 1, user: 'John Doe', action: 'created budget for Marketing', amount: '₹100,000', time: '2 hours ago', color: '#3b82f6' },
     { id: 2, user: 'Jane Smith', action: 'updated Operations budget', amount: '₹15,000', time: '5 hours ago', color: '#10b981' },
@@ -458,35 +615,54 @@ const RecentBudgetActivities = () => {
   ];
 
   return (
-    <GlassCard sx={{ height: '100%' }}>
-      <CardContent sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+    <GlassCard sx={{ height: '100%', minHeight: { xs: 400, sm: 450 } }}>
+      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          mb: 3,
+          flexWrap: 'wrap',
+          gap: 1
+        }}>
           <Box>
-            <PoppinsTypography variant="h6" sx={{ fontWeight: 600, mb: 0.5, fontSize: '1.1rem' }}>
+            <PoppinsTypography variant="h6" sx={{ 
+              fontWeight: 600, 
+              mb: 0.5, 
+              fontSize: { xs: '1rem', sm: '1.1rem' } 
+            }}>
               Recent Activities
             </PoppinsTypography>
-            <PoppinsTypography variant="body2" sx={{ color: 'text.secondary', fontWeight: 400 }}>
+            <PoppinsTypography variant="body2" sx={{ 
+              color: 'text.secondary', 
+              fontWeight: 400,
+              fontSize: { xs: '0.8rem', sm: '0.875rem' }
+            }}>
               Latest budget changes and approvals
             </PoppinsTypography>
           </Box>
           <Chip 
             label="Live" 
-            size="small" 
+            size={isMobile ? "small" : "medium"}
             color="success" 
-            sx={{ fontFamily: '"Poppins", sans-serif', fontWeight: 500 }}
+            sx={{ 
+              fontFamily: '"Poppins", sans-serif', 
+              fontWeight: 500,
+              fontSize: { xs: '0.7rem', sm: '0.8125rem' }
+            }}
           />
         </Box>
 
-        <Box sx={{ mt: 2 }}>
+        <Box sx={{ mt: 1 }}>
           {activities.map((activity, index) => (
             <Box 
               key={activity.id}
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 2,
-                p: 2,
-                mb: 2,
+                gap: { xs: 1, sm: 1.5 },
+                p: { xs: 1.5, sm: 2 },
+                mb: 1.5,
                 borderRadius: 2,
                 background: alpha(theme.palette.background.paper, 0.5),
                 border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
@@ -502,9 +678,9 @@ const RecentBudgetActivities = () => {
               }}
             >
               <Box sx={{ 
-                width: 40, 
-                height: 40, 
-                borderRadius: '12px',
+                width: { xs: 36, sm: 40 }, 
+                height: { xs: 36, sm: 40 }, 
+                borderRadius: { xs: '10px', sm: '12px' },
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -512,26 +688,50 @@ const RecentBudgetActivities = () => {
                 color: activity.color,
                 fontWeight: 600,
                 fontFamily: '"Poppins", sans-serif',
+                fontSize: { xs: '0.9rem', sm: '1rem' },
+                flexShrink: 0
               }}>
                 {activity.user.charAt(0)}
               </Box>
-              <Box sx={{ flex: 1 }}>
-                <PoppinsTypography variant="body2" sx={{ fontWeight: 500 }}>
-                  {activity.user} <PoppinsTypography component="span" variant="body2" sx={{ color: 'text.secondary', fontWeight: 400 }}>
-                    {activity.action}
+              <Box sx={{ 
+                flex: 1,
+                minWidth: 0,
+                overflow: 'hidden'
+              }}>
+                <PoppinsTypography variant="body2" sx={{ 
+                  fontWeight: 500,
+                  fontSize: { xs: '0.85rem', sm: '0.875rem' },
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
+                  {activity.user}{' '}
+                  <PoppinsTypography component="span" variant="body2" sx={{ 
+                    color: 'text.secondary', 
+                    fontWeight: 400,
+                    fontSize: { xs: '0.85rem', sm: '0.875rem' }
+                  }}>
+                    {isMobile ? activity.action.replace('budget', 'bdgt') : activity.action}
                   </PoppinsTypography>
                 </PoppinsTypography>
-                <PoppinsTypography variant="caption" sx={{ color: 'text.secondary', fontWeight: 400 }}>
-                  {activity.time} • Amount: {activity.amount}
+                <PoppinsTypography variant="caption" sx={{ 
+                  color: 'text.secondary', 
+                  fontWeight: 400,
+                  fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                  display: 'block',
+                  mt: 0.25
+                }}>
+                  {activity.time} • Amount: {isMobile ? activity.amount.replace(',000', 'k') : activity.amount}
                 </PoppinsTypography>
               </Box>
               <Box sx={{ 
-                width: 8, 
-                height: 8, 
+                width: 6, 
+                height: 6, 
                 borderRadius: '50%', 
                 bgcolor: activity.color,
                 animation: `${pulseAnimation} 2s infinite`,
-                animationDelay: `${index * 0.3}s`
+                animationDelay: `${index * 0.3}s`,
+                flexShrink: 0
               }} />
             </Box>
           ))}
@@ -539,12 +739,14 @@ const RecentBudgetActivities = () => {
 
         <Button
           fullWidth
+          size={isMobile ? "small" : "medium"}
           sx={{
             mt: 2,
             textTransform: 'none',
             fontWeight: 500,
             fontFamily: '"Poppins", sans-serif',
             color: 'text.secondary',
+            fontSize: { xs: '0.85rem', sm: '0.875rem' },
             '&:hover': {
               color: 'text.primary',
               background: alpha(theme.palette.primary.main, 0.04)
@@ -561,6 +763,8 @@ const RecentBudgetActivities = () => {
 const Budgeting = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'lg'));
 
   const {
     allBudgets,
@@ -605,7 +809,7 @@ const Budgeting = () => {
   const budgetStats = [
     {
       title: "Total Allocated",
-      value: `₹${totalAllocated.toLocaleString()}`,
+      value: `₹${isMobile ? `${Math.round(totalAllocated/1000)}k` : totalAllocated.toLocaleString()}`,
       icon: <AccountBalanceIcon />,
       color: "#3b82f6",
       subtitle: "Total budget allocation",
@@ -615,7 +819,7 @@ const Budgeting = () => {
     },
     {
       title: "Total Expenses",
-      value: `₹${totalSpent.toLocaleString()}`,
+      value: `₹${isMobile ? `${Math.round(totalSpent/1000)}k` : totalSpent.toLocaleString()}`,
       icon: <MonetizationOnIcon />,
       color: "#ef4444",
       subtitle: `Total budget used`,
@@ -625,7 +829,7 @@ const Budgeting = () => {
     },
     {
       title: "Remaining Balance",
-      value: `₹${remainingBalance.toLocaleString()}`,
+      value: `₹${isMobile ? `${Math.round(remainingBalance/1000)}k` : remainingBalance.toLocaleString()}`,
       icon: <SavingsIcon />,
       color: "#10b981",
       subtitle: "Available funds",
@@ -653,8 +857,8 @@ const Budgeting = () => {
           fontFamily: '"Poppins", "Roboto", "Helvetica", "Arial", sans-serif',
         },
         '::-webkit-scrollbar': {
-          width: '10px',
-          height: '10px'
+          width: '8px',
+          height: '8px'
         },
         '::-webkit-scrollbar-track': {
           background: 'linear-gradient(180deg, #f1f1f1 0%, #e1e1e1 100%)',
@@ -667,51 +871,64 @@ const Budgeting = () => {
             background: 'linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)'
           }
         },
+        [theme.breakpoints.down('sm')]: {
+          '::-webkit-scrollbar': {
+            width: '4px',
+            height: '4px'
+          }
+        }
       }} />
       
-      <Box sx={{ 
-        p: { xs: 1.5, sm: 2, md: 3 }, 
-        minHeight: "100vh",
-        background: `linear-gradient(135deg, ${alpha(theme.palette.background.default, 0.8)} 0%, ${alpha(theme.palette.background.paper, 0.9)} 100%)`,
-        position: 'relative',
-        overflow: 'hidden',
-        fontFamily: '"Poppins", sans-serif',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: `radial-gradient(circle at 20% 80%, ${alpha(theme.palette.primary.main, 0.05)} 0%, transparent 50%)`,
-          pointerEvents: 'none'
-        }
-      }}>
+      <Container 
+        maxWidth="xl" 
+        sx={{ 
+          p: { xs: 1, sm: 1.5, md: 2, lg: 3 } ,
+          minHeight: "100vh",
+          background: `linear-gradient(135deg, ${alpha(theme.palette.background.default, 0.8)} 0%, ${alpha(theme.palette.background.paper, 0.9)} 100%)`,
+          position: 'relative',
+          overflow: 'hidden',
+          fontFamily: '"Poppins", sans-serif',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: `radial-gradient(circle at 20% 80%, ${alpha(theme.palette.primary.main, 0.05)} 0%, transparent 50%)`,
+            pointerEvents: 'none'
+          }
+        }}
+      >
         <BudgetingHeader />
         
         {/* Stats Cards */}
-        <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid container spacing={{ xs: 1.5, sm: 2, md: 3 }} sx={{ mb: { xs: 2, sm: 3, md: 4 } }}>
           {budgetStats.map((stat, index) => (
-            <Grid key={index} size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid key={index} item xs={12} sm={6} md={3}>
               <StatCard stat={stat} index={index} />
             </Grid>
           ))}
         </Grid>
 
         {/* Charts and Activities Section */}
-        <Grid container spacing={3} sx={{ mb: 4 }}>
-          <Grid size={{ xs: 12, lg: 8 }}>
+        <Grid container spacing={{ xs: 1.5, sm: 2, md: 3 }} sx={{ mb: { xs: 2, sm: 3, md: 4 } }}>
+          <Grid item xs={12} lg={8}>
             <BudgetUsageChart />
           </Grid>
-          <Grid size={{ xs: 12, lg: 4 }}>
+          <Grid item xs={12} lg={4}>
             <RecentBudgetActivities />
           </Grid>
         </Grid>
 
         {/* Budget Form */}
-        <GlassCard sx={{ mb: 4 }}>
-          <CardContent sx={{ p: 3 }}>
-            <PoppinsTypography variant="h6" sx={{ fontWeight: 600, mb: 3, fontSize: '1.1rem' }}>
+        <GlassCard sx={{ mb: { xs: 2, sm: 3, md: 4 } }}>
+          <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+            <PoppinsTypography variant="h6" sx={{ 
+              fontWeight: 600, 
+              mb: 3, 
+              fontSize: { xs: '1rem', sm: '1.1rem' } 
+            }}>
               Create New Budget
             </PoppinsTypography>
             <BudgetForm
@@ -733,7 +950,7 @@ const Budgeting = () => {
           fontFamily: '"Poppins", sans-serif',
         }}>
           <GlassCard>
-            <CardContent sx={{ p: 0 }}>
+            <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
               <BudgetTable
                 showPagination
                 limit={limit}
@@ -764,7 +981,7 @@ const Budgeting = () => {
           handleChange={handleChange}
           handleSubmit={handleSubmit}
         />
-      </Box>
+      </Container>
     </>
   );
 };

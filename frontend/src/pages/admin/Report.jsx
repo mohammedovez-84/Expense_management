@@ -22,7 +22,8 @@ import {
     Grid,
     alpha,
     useTheme,
-    Container
+    Container,
+    useMediaQuery
 } from '@mui/material';
 import {
     Download as DownloadIcon,
@@ -47,7 +48,7 @@ import { fetchReimbursements } from '../../store/reimbursementSlice';
 // Styled Components
 const GlassCard = ({ children, sx = {} }) => (
     <Card sx={{
-        background: `linear-gradient(135deg, ${alpha('#3b82f6', 0.1)} 0%, ${alpha('#ffffff', 0.8)} 100%)`,
+        background: `linear-gradient(135deg, ${alpha('#3b82f6', 0.05)} 0%, ${alpha('#ffffff', 0.1)} 100%)`,
         backdropFilter: 'blur(10px)',
         border: '1px solid rgba(59, 130, 246, 0.1)',
         borderRadius: '16px',
@@ -89,6 +90,8 @@ const Reports = () => {
     const { currentLoc } = useLocation();
     const theme = useTheme();
     const dispatch = useDispatch();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
     useEffect(() => {
         dispatch(fetchBudgets({ location: currentLoc }));
@@ -636,27 +639,41 @@ const Reports = () => {
     };
 
     return (
-        <Container maxWidth="xl" sx={{ py: 3 }}>
+        <Container maxWidth="xl" sx={{ 
+            py: { xs: 2, sm: 3 },
+            background: 'transparent',
+            minHeight: '100vh'
+        }}>
             {/* Header */}
-            <Box sx={{ mb: 4 }}>
+            <Box sx={{ mb: { xs: 3, sm: 4 } }}>
                 <Typography variant="h4" sx={{ 
                     fontWeight: 700, 
                     background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
-                    mb: 1
+                    mb: 1,
+                    fontSize: { xs: '1.5rem', sm: '2rem', md: '2.25rem' }
                 }}>
                     Reports Dashboard
                 </Typography>
-                <Typography variant="body1" color="text.secondary">
+                <Typography variant="body1" color="text.secondary" sx={{
+                    fontSize: { xs: '0.875rem', sm: '1rem' }
+                }}>
                     Generate comprehensive reports for expenses, budgets, reimbursements and comparisons
                 </Typography>
             </Box>
 
             {/* Report Generator */}
-            <GlassCard sx={{ mb: 4 }}>
-                <CardContent>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+            <GlassCard sx={{ mb: { xs: 3, sm: 4 } }}>
+                <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                    <Box sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: 2, 
+                        mb: 3,
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        textAlign: { xs: 'center', sm: 'left' }
+                    }}>
                         <Box sx={{
                             width: 48,
                             height: 48,
@@ -665,12 +682,15 @@ const Reports = () => {
                             alignItems: 'center',
                             justifyContent: 'center',
                             background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-                            color: 'white'
+                            color: 'white',
+                            flexShrink: 0
                         }}>
                             <AnalyticsIcon />
                         </Box>
                         <Box>
-                            <Typography variant="h5" fontWeight={700}>
+                            <Typography variant="h5" fontWeight={700} sx={{
+                                fontSize: { xs: '1.25rem', sm: '1.5rem' }
+                            }}>
                                 Report Generator
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
@@ -680,13 +700,13 @@ const Reports = () => {
                     </Box>
 
                     {/* Filter Controls */}
-                    <Grid container spacing={4}>
+                    <Grid container spacing={3}>
                         {/* Report Type */}
                         <Grid item xs={12} md={6}>
                             <Typography variant="body2" fontWeight={600} mb={2}>
                                 📋 Report Type
                             </Typography>
-                            <FormControl fullWidth>
+                            <FormControl fullWidth size={isMobile ? "small" : "medium"}>
                                 <Select
                                     value={filter.type}
                                     onChange={(e) => setFilter({ ...filter, type: e.target.value })}
@@ -711,7 +731,7 @@ const Reports = () => {
                             <Typography variant="body2" fontWeight={600} mb={2}>
                                 🏢 Department
                             </Typography>
-                            <FormControl fullWidth disabled={filter.type === 'budgets'}>
+                            <FormControl fullWidth size={isMobile ? "small" : "medium"} disabled={filter.type === 'budgets'}>
                                 <Select
                                     value={filter.type === 'budgets' ? 'all' : filter.department}
                                     onChange={(e) => handleDepartmentChange(e.target.value)}
@@ -732,7 +752,7 @@ const Reports = () => {
                                 <Typography variant="body2" fontWeight={600} mb={2}>
                                     📊 Categories
                                 </Typography>
-                                <FormControl fullWidth disabled={filter.type === 'budgets'}>
+                                <FormControl fullWidth size={isMobile ? "small" : "medium"} disabled={filter.type === 'budgets'}>
                                     <Select
                                         value={filter.subDepartment}
                                         onChange={(e) => setFilter({ ...filter, subDepartment: e.target.value })}
@@ -754,7 +774,7 @@ const Reports = () => {
                                 <Typography variant="body2" fontWeight={600} mb={2}>
                                     💳 Reimbursement Status
                                 </Typography>
-                                <FormControl fullWidth>
+                                <FormControl fullWidth size={isMobile ? "small" : "medium"}>
                                     <Select
                                         value={filter.reimbursementStatus}
                                         onChange={(e) => setFilter({ ...filter, reimbursementStatus: e.target.value })}
@@ -773,7 +793,7 @@ const Reports = () => {
 
                         {/* Date Range */}
                         <Grid item xs={12}>
-                            <Typography variant="body2" fontWeight={600} mb={3}>
+                            <Typography variant="body2" fontWeight={600} mb={2}>
                                 📅 Date Range
                             </Typography>
                             <Grid container spacing={2}>
@@ -786,7 +806,7 @@ const Reports = () => {
                                             dateRange: { ...filter.dateRange, start: e.target.value }
                                         })}
                                         fullWidth
-                                        size="small"
+                                        size={isMobile ? "small" : "medium"}
                                         InputLabelProps={{ shrink: true }}
                                     />
                                 </Grid>
@@ -802,7 +822,7 @@ const Reports = () => {
                                             dateRange: { ...filter.dateRange, end: e.target.value }
                                         })}
                                         fullWidth
-                                        size="small"
+                                        size={isMobile ? "small" : "medium"}
                                         InputLabelProps={{ shrink: true }}
                                     />
                                 </Grid>
@@ -811,18 +831,25 @@ const Reports = () => {
                     </Grid>
 
                     {/* Action Buttons */}
-                    <Box sx={{ display: 'flex', gap: 2, mt: 4, justifyContent: 'center' }}>
+                    <Box sx={{ 
+                        display: 'flex', 
+                        gap: 2, 
+                        mt: 4, 
+                        justifyContent: 'center',
+                        flexDirection: { xs: 'column', sm: 'row' }
+                    }}>
                         <Button
                             variant="contained"
                             onClick={generateReport}
                             disabled={loading}
                             startIcon={loading ? <CircularProgress size={20} /> : <AnalyticsIcon />}
                             sx={{
-                                px: 4,
+                                px: { xs: 2, sm: 4 },
                                 py: 1.5,
                                 borderRadius: '12px',
                                 background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
                                 fontWeight: 600,
+                                fontSize: { xs: '0.875rem', sm: '1rem' },
                                 '&:hover': {
                                     background: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)',
                                 }
@@ -835,10 +862,11 @@ const Reports = () => {
                             onClick={resetFilters}
                             startIcon={<RefreshIcon />}
                             sx={{
-                                px: 4,
+                                px: { xs: 2, sm: 4 },
                                 py: 1.5,
                                 borderRadius: '12px',
                                 fontWeight: 600,
+                                fontSize: { xs: '0.875rem', sm: '1rem' },
                                 borderColor: alpha(theme.palette.primary.main, 0.3),
                                 '&:hover': {
                                     borderColor: theme.palette.primary.main,
@@ -855,30 +883,45 @@ const Reports = () => {
             {/* Generated Report */}
             {generatedReport && (
                 <GlassCard>
-                    <CardContent>
+                    <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                         {/* Report Header */}
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
-                            <Box>
+                        <Box sx={{ 
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            alignItems: 'center', 
+                            mb: 4, 
+                            flexWrap: 'wrap', 
+                            gap: 2,
+                            flexDirection: { xs: 'column', sm: 'row' }
+                        }}>
+                            <Box sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
                                 <Typography variant="h5" fontWeight={700} sx={{
                                     background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
                                     WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent'
+                                    WebkitTextFillColor: 'transparent',
+                                    fontSize: { xs: '1.25rem', sm: '1.5rem' }
                                 }}>
                                     {generatedReport.title}
                                 </Typography>
-                                <Typography variant="body2" color="text.secondary">
+                                <Typography variant="body2" color="text.secondary" sx={{
+                                    fontSize: { xs: '0.75rem', sm: '0.875rem' }
+                                }}>
                                     Generated on {formatDate(generatedReport.date)} • 
                                     {generatedReport.department !== 'All Departments' ? ` Department: ${generatedReport.department}` : ''}
                                     {generatedReport.subDepartment !== 'all' ? ` (${generatedReport.subDepartment})` : ''} • 
                                     {generatedReport.items.length} records
                                 </Typography>
                             </Box>
-                            <Box sx={{ display: 'flex', gap: 1 }}>
+                            <Box sx={{ 
+                                display: 'flex', 
+                                gap: 1,
+                                justifyContent: { xs: 'center', sm: 'flex-end' }
+                            }}>
                                 <Button
                                     variant="outlined"
                                     onClick={exportCSV}
                                     startIcon={<DownloadIcon />}
-                                    size="medium"
+                                    size={isMobile ? "small" : "medium"}
                                     sx={{
                                         borderColor: alpha(theme.palette.primary.main, 0.3),
                                         '&:hover': {
@@ -893,7 +936,7 @@ const Reports = () => {
                                     variant="contained"
                                     onClick={exportPDF}
                                     startIcon={<PdfIcon />}
-                                    size="medium"
+                                    size={isMobile ? "small" : "medium"}
                                     sx={{ 
                                         background: 'linear-gradient(135deg, #059669 0%, #10B981 100%)',
                                         '&:hover': {
@@ -905,57 +948,57 @@ const Reports = () => {
                                 </Button>
                             </Box>
                         </Box>
-                        <Divider sx={{ my: 4 }} />
+                        <Divider sx={{ my: { xs: 3, sm: 4 } }} />
 
                         {/* Data Table */}
                         {generatedReport.items.length > 0 ? (
-                            <TableContainer sx={{ 
+                            <Box sx={{ 
                                 borderRadius: '12px',
                                 border: '1px solid rgba(0, 0, 0, 0.1)',
-                                maxHeight: '500px',
-                                overflow: 'auto'
+                                overflow: 'auto',
+                                maxHeight: { xs: '400px', sm: '500px' }
                             }}>
-                                <Table stickyHeader>
+                                <Table size={isMobile ? "small" : "medium"}>
                                     <TableHead>
                                         <TableRow sx={{ backgroundColor: 'rgba(59, 130, 246, 0.08)' }}>
                                             {generatedReport.type === 'expenses' && (
                                                 <>
-                                                    <TableCell>ID</TableCell>
-                                                    <TableCell>User</TableCell>
-                                                    <TableCell>Department</TableCell>
-                                                    <TableCell>Categories</TableCell>
-                                                    <TableCell>Date</TableCell>
-                                                    <TableCell>Amount</TableCell>
-                                                    <TableCell>Description</TableCell>
-                                                    <TableCell>Payment Mode</TableCell>
+                                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>ID</TableCell>
+                                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>User</TableCell>
+                                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Department</TableCell>
+                                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Categories</TableCell>
+                                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Date</TableCell>
+                                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Amount</TableCell>
+                                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Description</TableCell>
+                                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Payment Mode</TableCell>
                                                 </>
                                             )}
                                             {generatedReport.type === 'budgets' && (
                                                 <>
-                                                    <TableCell>ID</TableCell>
-                                                    <TableCell>Name</TableCell>
-                                                    <TableCell>Allocated</TableCell>
-                                                    <TableCell>Company</TableCell>
-                                                    <TableCell>Month</TableCell>
-                                                    <TableCell>Year</TableCell>
-                                                    <TableCell>Spent</TableCell>
-                                                    <TableCell>Remaining</TableCell>
+                                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>ID</TableCell>
+                                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Name</TableCell>
+                                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Allocated</TableCell>
+                                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Company</TableCell>
+                                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Month</TableCell>
+                                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Year</TableCell>
+                                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Spent</TableCell>
+                                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Remaining</TableCell>
                                                 </>
                                             )}
                                             {generatedReport.type === 'reimbursement' && (
                                                 <>
-                                                    <TableCell>ID</TableCell>
-                                                    <TableCell>Requested User</TableCell>
-                                                    <TableCell>Amount</TableCell>
-                                                    <TableCell>Status</TableCell>
-                                                    <TableCell>Date</TableCell>
+                                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>ID</TableCell>
+                                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Requested User</TableCell>
+                                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Amount</TableCell>
+                                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Status</TableCell>
+                                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Date</TableCell>
                                                 </>
                                             )}
                                             {generatedReport.type === 'comparison' && (
                                                 <>
-                                                    <TableCell>Department</TableCell>
-                                                    <TableCell>Total Budget</TableCell>
-                                                    <TableCell>Total Expense</TableCell>
+                                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Department</TableCell>
+                                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Total Budget</TableCell>
+                                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Total Expense</TableCell>
                                                 </>
                                             )}
                                         </TableRow>
@@ -966,37 +1009,42 @@ const Reports = () => {
                                                 {generatedReport.type === 'expenses' && (
                                                     <>
                                                         <TableCell>{index + 1}</TableCell>
-                                                        <TableCell>{item.user}</TableCell>
+                                                        <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.user}</TableCell>
                                                         <TableCell>
                                                             <Chip label={item.department} size="small" variant="outlined" />
                                                         </TableCell>
                                                         <TableCell>
                                                             <Chip label={item.subDepartment} size="small" variant="outlined" color="secondary" />
                                                         </TableCell>
-                                                        <TableCell>{item.date}</TableCell>
+                                                        <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.date}</TableCell>
                                                         <TableCell>
-                                                            <Typography fontWeight="bold" color="#10b981">
+                                                            <Typography fontWeight="bold" color="#10b981" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                                                                 ₹{item.amount?.toLocaleString()}
                                                             </Typography>
                                                         </TableCell>
-                                                        <TableCell>{item.description}</TableCell>
+                                                        <TableCell sx={{ 
+                                                            maxWidth: { xs: '150px', sm: '200px', md: '300px' },
+                                                            overflow: 'hidden',
+                                                            textOverflow: 'ellipsis',
+                                                            whiteSpace: 'nowrap'
+                                                        }}>{item.description}</TableCell>
                                                         <TableCell>
-                                                            <Chip label={item.paymentMode} size="small" />
+                                                            <Chip label={item.paymentMode} size="small" sx={{ fontSize: { xs: '0.7rem', sm: '0.8rem' } }} />
                                                         </TableCell>
                                                     </>
                                                 )}
                                                 {generatedReport.type === 'budgets' && (
                                                     <>
                                                         <TableCell>{index + 1}</TableCell>
-                                                        <TableCell>{item.user}</TableCell>
+                                                        <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.user}</TableCell>
                                                         <TableCell>
-                                                            <Typography fontWeight="bold" color="#10b981">
+                                                            <Typography fontWeight="bold" color="#10b981" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                                                                 ₹{item.allocatedAmount?.toLocaleString()}
                                                             </Typography>
                                                         </TableCell>
-                                                        <TableCell>{item.company}</TableCell>
-                                                        <TableCell>{item.month}</TableCell>
-                                                        <TableCell>{item.year}</TableCell>
+                                                        <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.company}</TableCell>
+                                                        <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.month}</TableCell>
+                                                        <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.year}</TableCell>
                                                         <TableCell>₹{item.spentAmount?.toLocaleString()}</TableCell>
                                                         <TableCell>₹{item.remainingAmount?.toLocaleString()}</TableCell>
                                                     </>
@@ -1004,9 +1052,9 @@ const Reports = () => {
                                                 {generatedReport.type === 'reimbursement' && (
                                                     <>
                                                         <TableCell>{index + 1}</TableCell>
-                                                        <TableCell>{item.requestedBy}</TableCell>
+                                                        <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.requestedBy}</TableCell>
                                                         <TableCell>
-                                                            <Typography fontWeight="bold" color="#10b981">
+                                                            <Typography fontWeight="bold" color="#10b981" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                                                                 ₹{item.amount?.toLocaleString()}
                                                             </Typography>
                                                         </TableCell>
@@ -1015,18 +1063,19 @@ const Reports = () => {
                                                                 label={item.status} 
                                                                 color={item.status === 'paid' ? 'success' : 'warning'} 
                                                                 size="small" 
+                                                                sx={{ fontSize: { xs: '0.7rem', sm: '0.8rem' } }}
                                                             />
                                                         </TableCell>
-                                                        <TableCell>{item.date}</TableCell>
+                                                        <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.date}</TableCell>
                                                     </>
                                                 )}
                                                 {generatedReport.type === 'comparison' && (
                                                     <>
                                                         <TableCell>
-                                                            <Chip label={item.department} size="small" variant="outlined" />
+                                                            <Chip label={item.department} size="small" variant="outlined" sx={{ fontSize: { xs: '0.7rem', sm: '0.8rem' } }} />
                                                         </TableCell>
                                                         <TableCell>
-                                                            <Typography fontWeight="bold" color="#10b981">
+                                                            <Typography fontWeight="bold" color="#10b981" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                                                                 ₹{item.totalBudget?.toLocaleString()}
                                                             </Typography>
                                                         </TableCell>
@@ -1037,10 +1086,10 @@ const Reports = () => {
                                         ))}
                                     </TableBody>
                                 </Table>
-                            </TableContainer>
+                            </Box>
                         ) : (
                             <Box sx={{ textAlign: 'center', py: 6 }}>
-                                <Typography variant="h6" color="text.secondary">
+                                <Typography variant="h6" color="text.secondary" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
                                     No data found for the selected filters
                                 </Typography>
                             </Box>
